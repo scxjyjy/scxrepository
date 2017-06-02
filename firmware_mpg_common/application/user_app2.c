@@ -708,7 +708,8 @@ static void UserApp2SM_Idle(void)
     {
       /* Update the LCD with the message and then go to a wait state */
       LCDCommand(LCD_CLEAR_CMD);
-      LCDMessage(LINE1_START_ADDR, "USER list is empty");
+      LCDMessage(LINE1_START_ADDR,"LED  ONTIME  OFFTIME");
+      LCDMessage(LINE2_START_ADDR, "USER list is empty");
       UserApp2_StateMachine = UserApp2SM_Delay;
     }
     else
