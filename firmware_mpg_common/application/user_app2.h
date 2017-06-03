@@ -35,6 +35,12 @@ typedef struct
   LedDisplayListNodeType* psFirstCommand;    /* Pointer to the first command in the list */
 } LedDisplayListHeadType;
 
+typedef struct
+{
+  u8 aCmdRepository[DEBUG_SCANF_BUFFER_SIZE];
+  void* psNextNode;
+}LEDRepositoryListType;
+
 
 /**********************************************************************************************************************
 Constants / Definitions
@@ -79,7 +85,10 @@ void UserApp2RunActiveState(void);
 void AllLedsOff(void);
 void LoadLcdScreen(void);
 void ResetListFades(LedDisplayListNodeType* psTargetList_);
-
+void CmdLineParser(bool *bpChoose1Parameter,bool *bpOutPutCmdLineParameter,u8* au8EnterStringParameter,u8* pu8StrLenParameter,bool* bpCmdisLegalParameter,u8* u8LedTypeParameter,u8* s1Parameter,u8* s2Parameter,u8* au8OnStringParameter,u8* au8OffStringParameter,bool* bpMenuPrintedParameter,bool* bpEnterCompletedParameter);
+void OutPutCmdLineList(bool *bpOutPutCmdLineParameter);//,LedDisplayListNodeType* psDisplayNormalNodeParameter);
+void SaveToRepository(u8* u8LedTypeParameter,u8* s1Parameter,u8* s2Parameter,u8* au8OnStringParameter,u8* au8OffStringParameter,u8* pu8StrLenParameter);
+void Check_and_Cutout(u8* au8EnterStringParameter,u8* pu8StrLenParameter,bool* bpCmdisLegalParameter,u8* u8LedTypeParameter,u8* ps1Parameter,u8* ps2Parameter,u8* au8OnStringParameter,u8* au8OffStringParameter);
 
 /***********************************************************************************************************************
 State Machine Declarations

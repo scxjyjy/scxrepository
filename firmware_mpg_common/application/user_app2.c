@@ -55,7 +55,7 @@ All Global variable names shall start with "G_"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp2Flags;                       /* Global state flags */
-
+LedDisplayListNodeType * psDisplayNormalNode=NULL;
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
@@ -63,8 +63,10 @@ extern volatile u32 G_u32SystemFlags;                  /* From main.c */
 extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
-extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
-
+extern volatile u32 G_u32SystemTime1s;
+/* From board-specific source file */
+extern u8 G_au8DebugScanfBuffer[DEBUG_SCANF_BUFFER_SIZE]; /* From debug.c */
+extern u8 G_u8DebugScanfCharCount;/* From debug.c */
 
 
 /***********************************************************************************************************************
@@ -74,12 +76,13 @@ Variable names shall start with "UserApp2_" and be declared as static.
 static fnCode_type UserApp2_StateMachine;            /* The state machine function pointer */
 
 static LedDisplayListHeadType UserApp2_sDemoLedCommandList;   
-static LedDisplayListHeadType UserApp2_sUserLedCommandList;     
+static LedDisplayListHeadType UserApp2_sUserLedCommandList;  
 static u32 UserApp2_u32SystemTime = 0;
 
 static LedDisplayListHeadType* UserApp2_psActiveList;
 static bool UserApp2_bSystemRunning = TRUE;
 static bool UserApp2_bSystemDark = FALSE;
+
 
 
 /**********************************************************************************************************************
@@ -143,6 +146,371 @@ void LedDisplayStartList(void)
   
 } /* end LedDisplayStartList */
 
+
+/*--------------------------------------------------------------------------------------------------------------------
+Function: Check_and_Cutout
+
+Description:
+According to '-' ,the command line is divided into three parts,detect if  
+format is consistent with the L-S-E format, but does not detect the correctness
+of the contents of the order ,contents will be checked when put in the LIST .
+
+Requires:
+1.EnterStringParameter(CmdLine String)
+2.StrLenParameter(length of cmdline ,include '\r')
+3.CmdisLegalParameter(judge if the content is right)
+4.LedTypeParameter
+....
+8.au8OffStringParameter
+To avoid use too many global variables,so we have to Transfer many parameters.
+we didn't use struct to save those parameter,so it's long.
+
+Promises:
+  - 
+*/
+
+void Check_and_Cutout(u8* au8EnterStringParameter,u8* pu8StrLenParameter,bool* bpCmdisLegalParameter,u8* u8LedTypeParameter,u8* ps1Parameter,u8* ps2Parameter,u8* au8OnStringParameter,u8* au8OffStringParameter)
+{ 
+  bool bS2=FALSE;
+  for(u8 i=0;i<=*pu8StrLenParameter-2;i++)
+  {
+    if(au8EnterStringParameter[i]==' ')
+    { 
+      if(i==(*pu8StrLenParameter-2))
+      {
+        *bpCmdisLegalParameter=FALSE;
+        DebugPrintf("\n\rOne more space in the end\n\r");
+        return;
+      }
+      else
+      {
+        *bpCmdisLegalParameter=FALSE;
+        DebugPrintf("\n\rUndesired space before ");
+        DebugPrintf(&au8EnterStringParameter[i+1]);
+        DebugPrintf("\n\r");
+        DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+        DebugPrintf(" : ");
+        return;
+      }
+    }
+  }
+  for(u8 i=0;i<=*pu8StrLenParameter-2;i++)
+  {
+    if((i==*pu8StrLenParameter-2)&&(au8EnterStringParameter[i]!='-'))
+    {
+      DebugPrintf("\n\rThere's no'-'in the command Line\n\r");
+      DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+      DebugPrintf(" : ");
+      return;
+    }
+    if(au8EnterStringParameter[i]=='-')
+    { 
+      if(i>1)
+      {
+        DebugPrintf("\n\rFirst '-' should put in the second place\n\r");
+        DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+        DebugPrintf(" : ");
+        return;
+      }
+      else if(i==1)
+      {
+        if(*pu8StrLenParameter-2>1)
+        {
+          *ps1Parameter=i;
+          for(u8 j=*ps1Parameter+1;j<=*pu8StrLenParameter-2;j++)
+          {
+            if(au8EnterStringParameter[j]=='-')
+            { 
+              bS2=TRUE;
+              if(j>=*pu8StrLenParameter-2)
+              {
+                DebugPrintf("\n\rThere should add an end time after'-'\n\r");
+                DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+                DebugPrintf(" : ");
+                i=*pu8StrLenParameter-1;
+              }
+              else
+              {
+                *ps2Parameter=j;
+                i=*pu8StrLenParameter-1;
+              }
+            }
+            if(j==*pu8StrLenParameter-2&&bS2==FALSE)
+            {
+              DebugPrintf("\n\rno second '-'\n\r");
+              DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+              DebugPrintf(" : ");
+              return;
+            }
+          }      
+        }
+        else
+        {
+        DebugPrintf("\n\rno second '-'\n\r");
+        DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+        DebugPrintf(" : ");
+        return;
+        }
+      }
+    }
+  }
+    *bpCmdisLegalParameter=TRUE;
+    *u8LedTypeParameter=au8EnterStringParameter[0];
+    for(u8 i=*ps1Parameter+1;i<*ps2Parameter;i++)
+    {
+      au8OnStringParameter[i-*ps1Parameter-1]=au8EnterStringParameter[i];
+    }
+    for(u8 i=*ps2Parameter+1;i<=*pu8StrLenParameter-2;i++)
+    {
+      au8OffStringParameter[i-*ps2Parameter-1]=au8EnterStringParameter[i];
+    }
+  
+}
+
+
+/*--------------------------------------------------------------------------------------------------------------------
+Function: SaveToRepository
+
+Description:
+Check the contents of the command line is correct or not, the correct order put 
+into the LIST,else return error
+
+Requires:
+1.LedTypeParameter
+2.s1Parameter(where the'-' is)
+3.s2Parameter(where the seconf '-' is)
+4.au8OnStringParameter(save Start Time)
+5.au8OffStringParameter(save End Time)
+6.StrLenParameter(length of cmdline ,include '\r')
+Promises:
+  - 
+*/
+void SaveToRepository(u8* u8LedTypeParameter,u8* s1Parameter,u8* s2Parameter,u8* au8OnStringParameter,u8* au8OffStringParameter,u8* pu8StrLenParameter) 
+{
+  LedCommandType sStartTimeNewNode,sEndTimeNewNode;
+  LedCommandType *psStartTimeNewNode=&sStartTimeNewNode;
+  LedCommandType *psEndTimeNewNode=&sEndTimeNewNode;
+  sStartTimeNewNode.u32Time=0;
+  sEndTimeNewNode.u32Time=0;
+  sStartTimeNewNode.bOn=TRUE;
+  sEndTimeNewNode.bOn=FALSE;
+  if(*u8LedTypeParameter=='r'||*u8LedTypeParameter=='R')
+  {
+    sStartTimeNewNode.eLED=RED;
+    sEndTimeNewNode.eLED=RED;
+  }
+  else if(*u8LedTypeParameter=='o'||*u8LedTypeParameter=='O')
+  {
+    sStartTimeNewNode.eLED=ORANGE;
+    sEndTimeNewNode.eLED=ORANGE;
+  }
+  else if(*u8LedTypeParameter=='y'||*u8LedTypeParameter=='Y')
+  {
+    sStartTimeNewNode.eLED=YELLOW;
+    sEndTimeNewNode.eLED=YELLOW;
+  }
+  else if(*u8LedTypeParameter=='g'||*u8LedTypeParameter=='G')
+  {
+    sStartTimeNewNode.eLED=GREEN;
+    sEndTimeNewNode.eLED=GREEN;
+  }
+  else if(*u8LedTypeParameter=='c'||*u8LedTypeParameter=='C')
+  {
+    sStartTimeNewNode.eLED=CYAN;
+    sEndTimeNewNode.eLED=CYAN;
+  }
+  else if(*u8LedTypeParameter=='b'||*u8LedTypeParameter=='B')
+  {
+    sStartTimeNewNode.eLED=BLUE;
+    sEndTimeNewNode.eLED=BLUE;
+  }
+  else if(*u8LedTypeParameter=='p'||*u8LedTypeParameter=='P')
+  {
+    sStartTimeNewNode.eLED=PURPLE;
+    sEndTimeNewNode.eLED=PURPLE;
+  }
+  else if(*u8LedTypeParameter=='w'||*u8LedTypeParameter=='W')
+  {
+    sStartTimeNewNode.eLED=WHITE;
+    sEndTimeNewNode.eLED=WHITE;
+  }
+  else
+  {
+    DebugPrintf(u8LedTypeParameter);
+    DebugPrintf(" is not a Legal color of LED\n\r");
+    DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+    DebugPrintf(" : ");
+    return;
+  }
+  for( u8 i=*s2Parameter-*s1Parameter-1;i!=0;i--)
+  {
+    if(au8OnStringParameter[i-1]>='0'&&au8OnStringParameter[i-1]<='9')
+    {
+      sStartTimeNewNode.u32Time+=((au8OnStringParameter[*s2Parameter-*s1Parameter-1-i]-0x30)*pow(10,i-1));
+    }
+    else
+    {
+      DebugPrintf("invalid StartTime\n\r");
+      DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+      DebugPrintf(" : ");
+      return;
+    }
+  }
+  for(u8 i=*pu8StrLenParameter-*s2Parameter-2;i!=0;i--)
+  {
+    if(au8OffStringParameter[i-1]>='0'&&au8OffStringParameter[i-1]<='9')
+    {
+      sEndTimeNewNode.u32Time+=((au8OffStringParameter[*pu8StrLenParameter-*s2Parameter-2-i]-0x30)*pow(10,i-1));
+    }
+    else
+    {
+       DebugPrintf("\n\rinvalid EndTime\n\r");
+       DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+       DebugPrintf(" : ");
+       return;
+    }
+    if(sEndTimeNewNode.u32Time<sStartTimeNewNode.u32Time)
+    {
+      DebugPrintf("\n\rEndTime shouldn't be smaller than StartTime\n\r");
+      DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+      DebugPrintf(" : ");
+      return;
+    }
+    //DebugPrintNumber(sEndTimeNewNode.u32Time);
+    //DebugPrintNumber(sEndTimeNewNode.eLED);  
+  }
+   DebugPrintf("\n\r");
+   sEndTimeNewNode.u32Time+=200;
+   LedDisplayAddCommand(USER_LIST,psStartTimeNewNode);
+   LedDisplayAddCommand(USER_LIST,psEndTimeNewNode);
+   DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2+1);
+   DebugPrintf(" : ");
+    
+}
+
+/*--------------------------------------------------------------------------------------------------------------------
+Function: CmdLineParser
+
+Description:
+Analyze the input instructions
+such as if there is a"1\r" input or "2\r"
+Requires:
+1.bpChoose1Parameter
+2.bpOutPutCmdLineParameter
+3.au8EnterStringParameter
+...
+11.bpEnterCompletedParameter
+Promises:
+  - 
+*/
+void CmdLineParser(bool *bpChoose1Parameter,bool *bpOutPutCmdLineParameter,u8* au8EnterStringParameter,u8* pu8StrLenParameter,bool* bpCmdisLegalParameter,u8* u8LedTypeParameter,u8* s1Parameter,u8* s2Parameter,u8* au8OnStringParameter,u8* au8OffStringParameter,bool* bpMenuPrintedParameter,bool* bpEnterCompletedParameter)
+{  
+  if(G_au8DebugScanfBuffer[G_u8DebugScanfCharCount-1]=='\r')
+  {
+    *pu8StrLenParameter=DebugScanf(au8EnterStringParameter);
+    if(*pu8StrLenParameter==1)
+    {
+      *bpMenuPrintedParameter=FALSE;
+      *bpEnterCompletedParameter=TRUE;
+      *bpChoose1Parameter=FALSE;
+      DebugPrintf("\n\r\n\rCommand entry complete.\n\rCommand entered : ");
+      DebugPrintNumber(UserApp2_sUserLedCommandList.u8ListSize/2);
+      DebugPrintf("\n\r\n\r");
+      DebugPrintf("Current USER program:\n\r\nLED\tONTIME\t\tOFFTIME\n\r--------------------------------\n\r");
+      OutPutCmdLineList(bpOutPutCmdLineParameter);
+    }
+    else
+    {
+      Check_and_Cutout(au8EnterStringParameter,pu8StrLenParameter,bpCmdisLegalParameter,u8LedTypeParameter,s1Parameter,s2Parameter,au8OnStringParameter,au8OffStringParameter);
+      if(*bpCmdisLegalParameter==TRUE)
+      {
+        SaveToRepository(u8LedTypeParameter,s1Parameter,s2Parameter,au8OnStringParameter,au8OffStringParameter,pu8StrLenParameter);
+      }
+    }
+  }
+}
+
+/*--------------------------------------------------------------------------------------------------------------------
+Function: CmdLineParser
+
+Description:
+1.Complete the function of choose'2' to display the contents of the list
+2.We did't use your API,cause we did't find it at first time.....
+Requires:
+1.bpOutPutCmdLineParameter(judge if the output has been done(the '2' function))
+Promises:
+  - 
+*/
+void OutPutCmdLineList(bool *bpOutPutCmdLineParameter)//,LedDisplayListNodeType*psDisplayNormalNodeParameter)
+{ 
+  static u16 Counter=0;
+  //LedDisplayListNodeType * psDisplayNormalNode=psDisplayNormalNodeParameter;
+  if(*bpOutPutCmdLineParameter)
+  {
+    psDisplayNormalNode=UserApp2_sUserLedCommandList.psFirstCommand;
+    *bpOutPutCmdLineParameter=FALSE;
+    Counter=0;
+  }
+  if(UserApp2_sUserLedCommandList.psFirstCommand==NULL)
+  {
+    DebugPrintf("       USER list is empty\n\r--------------------------------\n\r\n\r");
+    *bpOutPutCmdLineParameter=TRUE;
+    return;
+  } 
+  if(UserApp2_sUserLedCommandList.u8ListSize==Counter)
+  {
+    DebugPrintf("--------------------------------\n\r\n\r");
+    *bpOutPutCmdLineParameter=TRUE;
+    return;
+  }
+  else
+  {
+    if(psDisplayNormalNode->eCommand.eLED==RED)
+    {
+      DebugPrintf(" R\t");
+    }
+    else if(psDisplayNormalNode->eCommand.eLED==ORANGE)
+    {
+    DebugPrintf(" O\t");
+    }
+    else if(psDisplayNormalNode->eCommand.eLED==YELLOW)
+    {
+      DebugPrintf(" Y\t");
+    }
+    else if(psDisplayNormalNode->eCommand.eLED==GREEN)
+    {
+      DebugPrintf(" G\t");
+    }
+    else if(psDisplayNormalNode->eCommand.eLED==CYAN)
+    {
+      DebugPrintf(" C\t");
+    }
+    else if(psDisplayNormalNode->eCommand.eLED==BLUE)
+    {
+      DebugPrintf(" B\t");
+    }
+    else if(psDisplayNormalNode->eCommand.eLED==PURPLE)
+    {
+      DebugPrintf(" P\t");
+    }
+    else if(psDisplayNormalNode->eCommand.eLED==WHITE)
+    {
+      DebugPrintf(" W\t");
+    }
+    else 
+    {
+      *bpOutPutCmdLineParameter=TRUE;
+      return;
+    }
+    DebugPrintNumber(psDisplayNormalNode->eCommand.u32Time);
+    psDisplayNormalNode=psDisplayNormalNode->psNextNode;
+    DebugPrintf("\t\t");
+    DebugPrintNumber(psDisplayNormalNode->eCommand.u32Time);
+    DebugPrintf("\n\r");
+    psDisplayNormalNode=psDisplayNormalNode->psNextNode;
+    Counter+=2;
+  }
+}
 
 /*--------------------------------------------------------------------------------------------------------------------
 Function: LedDisplayAddCommand
@@ -613,8 +981,7 @@ void AllLedsOff(void)
   LedPWM(CYAN, LED_PWM_0);
   LedPWM(BLUE, LED_PWM_0);
   LedPWM(PURPLE, LED_PWM_0);
-  LedPWM(WHITE, LED_PWM_0);
-  
+  LedPWM(WHITE, LED_PWM_0); 
 } /* end AllLedsOff() */
 
 
@@ -708,8 +1075,7 @@ static void UserApp2SM_Idle(void)
     {
       /* Update the LCD with the message and then go to a wait state */
       LCDCommand(LCD_CLEAR_CMD);
-      LCDMessage(LINE1_START_ADDR,"LED  ONTIME  OFFTIME");
-      LCDMessage(LINE2_START_ADDR, "USER list is empty");
+      LCDMessage(LINE1_START_ADDR, "USER list is empty");
       UserApp2_StateMachine = UserApp2SM_Delay;
     }
     else
