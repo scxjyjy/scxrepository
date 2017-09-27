@@ -61,7 +61,15 @@ Function Definitions
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Public functions                                                                                                   */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
+void AntCalculateChecksum(u8* pMsg,u8 u8Msgcount)
+{
+  u8 u8CSTemp=0;
+  for(u8 i=0;i<=u8Msgcount-2;i++)
+  {
+    u8CSTemp=u8CSTemp^pMsg[i];
+  }
+  pMsg[u8Msgcount-1]=u8CSTemp;
+}
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Protected functions                                                                                                */
@@ -82,10 +90,16 @@ Promises:
 void UserApp1Initialize(void)
 {
   u8 au8UserApp1Start1[] = "LED program task started\n\r";
+  /*Test strings*/
+  u8 au8SetChannelPower[]  = {0xA5, 2, 0x47, 0, 4, CS};
+  u8 au8SetChannelID[] = {0xA4, 5, 0x51, 1, 0xef, 0x12, 1, 50, CS};
   
   /* Turn off the Debug task command processor and announce the task is ready */
   DebugSetPassthrough();
   DebugPrintf(au8UserApp1Start1);
+  
+  AntCalculateChecksum(au8SetChannelPower,6);
+  AntCalculateChecksum(au8SetChannelID,9);
   
     /* If good initialization, set state to Idle */
   if( 1 )
