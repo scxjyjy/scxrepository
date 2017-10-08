@@ -1,8 +1,22 @@
 /**********************************************************************************************************************
-File: user_app3.c                                                                
+File: user_app.c                                                                
+
+----------------------------------------------------------------------------------------------------------------------
+To start a new task using this user_app as a template:
+ 1. Copy both user_app.c and user_app.h to the Application directory
+ 2. Rename the files yournewtaskname.c and yournewtaskname.h
+ 3. Add yournewtaskname.c and yournewtaskname.h to the Application Include and Source groups in the IAR project
+ 4. Use ctrl-h (make sure "Match Case" is checked) to find and replace all instances of "user_app" with "yournewtaskname"
+ 5. Use ctrl-h to find and replace all instances of "UserApp" with "YourNewTaskName"
+ 6. Use ctrl-h to find and replace all instances of "USER_APP" with "YOUR_NEW_TASK_NAME"
+ 7. Add a call to YourNewTaskNameInitialize() in the init section of main
+ 8. Add a call to YourNewTaskNameRunActiveState() in the Super Loop section of main
+ 9. Update yournewtaskname.h per the instructions at the top of yournewtaskname.h
+10. Delete this text (between the dashed lines) and update the Description below to describe your task
+----------------------------------------------------------------------------------------------------------------------
 
 Description:
-This is a user_app3.c file template 
+This is a user_app.c file template 
 
 ------------------------------------------------------------------------------------------------------------------------
 API:
@@ -11,10 +25,10 @@ Public functions:
 
 
 Protected System functions:
-void UserApp3Initialize(void)
+void UserAppInitialize(void)
 Runs required initialzation for the task.  Should only be called once in main init section.
 
-void UserApp3RunActiveState(void)
+void UserAppRunActiveState(void)
 Runs current task state.  Should only be called once in main loop.
 
 
@@ -24,10 +38,10 @@ Runs current task state.  Should only be called once in main loop.
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
-All Global variable names shall start with "G_UserApp3"
+All Global variable names shall start with "G_"
 ***********************************************************************************************************************/
 /* New variables */
-volatile u32 G_u32UserApp3Flags;                       /* Global state flags */
+volatile u32 G_u32UserAppFlags;                       /* Global state flags */
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -41,10 +55,10 @@ extern volatile u32 G_u32SystemTime1s;                 /* From board-specific so
 
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
-Variable names shall start with "UserApp3_" and be declared as static.
+Variable names shall start with "UserApp_" and be declared as static.
 ***********************************************************************************************************************/
-static fnCode_type UserApp3_StateMachine;            /* The state machine function pointer */
-//static u32 UserApp3_u32Timeout;                      /* Timeout counter used across states */
+static fnCode_type UserApp_StateMachine;            /* The state machine function pointer */
+static u32 UserApp_u32Timeout;                      /* Timeout counter used across states */
 
 
 /**********************************************************************************************************************
@@ -61,7 +75,7 @@ Function Definitions
 /*--------------------------------------------------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------------------------------------------------
-Function: UserApp3Initialize
+Function: UserAppInitialize
 
 Description:
 Initializes the State Machine and its variables.
@@ -72,24 +86,25 @@ Requires:
 Promises:
   - 
 */
-void UserApp3Initialize(void)
+void UserAppInitialize(void)
 {
+
   /* If good initialization, set state to Idle */
-  if( 1 )
+  if( 1 /* Add condition for good init */)
   {
-    UserApp3_StateMachine = UserApp3SM_Idle;
+    UserApp_StateMachine = UserAppSM_Idle;
   }
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
-    UserApp3_StateMachine = UserApp3SM_FailedInit;
+    UserApp_StateMachine = UserAppSM_FailedInit;
   }
 
-} /* end UserApp3Initialize() */
+} /* end UserAppInitialize() */
 
-  
+
 /*----------------------------------------------------------------------------------------------------------------------
-Function UserApp3RunActiveState()
+Function UserAppRunActiveState()
 
 Description:
 Selects and runs one iteration of the current state in the state machine.
@@ -102,11 +117,11 @@ Requires:
 Promises:
   - Calls the function to pointed by the state machine function pointer
 */
-void UserApp3RunActiveState(void)
+void UserAppRunActiveState(void)
 {
-  UserApp3_StateMachine();
+  UserApp_StateMachine();
 
-} /* end UserApp3RunActiveState */
+} /* end UserAppRunActiveState */
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -119,28 +134,28 @@ State Machine Function Definitions
 **********************************************************************************************************************/
 
 /*-------------------------------------------------------------------------------------------------------------------*/
-/* Wait for ??? */
-static void UserApp3SM_Idle(void)
+/* Wait for a message to be queued */
+static void UserAppSM_Idle(void)
 {
     
-} /* end UserApp3SM_Idle() */
-     
-#if 0
+} /* end UserAppSM_Idle() */
+
+
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
-static void UserApp3SM_Error(void)          
+static void UserAppSM_Error(void)          
 {
+  UserApp_StateMachine = UserAppSM_Idle;
   
-} /* end UserApp3SM_Error() */
-#endif
+} /* end UserAppSM_Error() */
 
 
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* State to sit in if init failed */
-static void UserApp3SM_FailedInit(void)          
+static void UserAppSM_FailedInit(void)          
 {
     
-} /* end UserApp3SM_FailedInit() */
+} /* end UserAppSM_FailedInit() */
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/

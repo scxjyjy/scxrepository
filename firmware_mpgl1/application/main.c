@@ -32,7 +32,7 @@ Main Program
 Main has two sections:
 
 1. Initialization which is run once on power-up or reset.  All drivers and applications are setup here without timing
-contraints but must complete execution 2regardless of success or failure of starting the application. 
+contraints but must complete execution regardless of success or failure of starting the application. 
 
 2. Super loop which runs infinitely giving processor time to each application.  The total loop time should not exceed
 1ms of execution time counting all application execution.  SystemSleep() will execute to complete the remaining time in
@@ -40,7 +40,6 @@ the 1ms period.
 ***********************************************************************************************************************/
 
 void main(void)
-
 {
   G_u32SystemFlags |= _SYSTEM_INITIALIZING;
 
@@ -61,17 +60,21 @@ void main(void)
   TimerInitialize();  
   SspInitialize();
   TWIInitialize();
-
+  Adc12Initialize();
+  
   LcdInitialize();
   LedInitialize();
   ButtonInitialize();
   AntInitialize();
+  AntApiInitialize();
+  SdCardInitialize();
 
   /* Application initialization */
+  BoardTestInitialize();
   UserApp1Initialize();
   UserApp2Initialize();
   UserApp3Initialize();
-  
+
   /* Exit initialization */
   SystemStatusReport();
   G_u32SystemFlags &= ~_SYSTEM_INITIALIZING;
@@ -88,12 +91,16 @@ void main(void)
     TimerRunActiveState(); 
     SspRunActiveState();
     TWIRunActiveState();
+    Adc12RunActiveState();
     MessagingRunActiveState();
     DebugRunActiveState();
     LcdRunActiveState();
     AntRunActiveState();
+    AntApiRunActiveState();
+    SdCardRunActiveState();
 
     /* Applications */
+    BoardTestRunActiveState();
     UserApp1RunActiveState();
     UserApp2RunActiveState();
     UserApp3RunActiveState();

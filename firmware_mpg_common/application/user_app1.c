@@ -1,18 +1,28 @@
 /**********************************************************************************************************************
 File: user_app1.c                                                                
 
-Description:
-Provides a Tera-Term driven system to display, read and write an LED command list.
+----------------------------------------------------------------------------------------------------------------------
+To start a new task using this user_app1 as a template:
+ 1. Copy both user_app1.c and user_app1.h to the Application directory
+ 2. Rename the files yournewtaskname.c and yournewtaskname.h
+ 3. Add yournewtaskname.c and yournewtaskname.h to the Application Include and Source groups in the IAR project
+ 4. Use ctrl-h (make sure "Match Case" is checked) to find and replace all instances of "user_app1" with "yournewtaskname"
+ 5. Use ctrl-h to find and replace all instances of "UserApp1" with "YourNewTaskName"
+ 6. Use ctrl-h to find and replace all instances of "USER_APP1" with "YOUR_NEW_TASK_NAME"
+ 7. Add a call to YourNewTaskNameInitialize() in the init section of main
+ 8. Add a call to YourNewTaskNameRunActiveState() in the Super Loop section of main
+ 9. Update yournewtaskname.h per the instructions at the top of yournewtaskname.h
+10. Delete this text (between the dashed lines) and update the Description below to describe your task
+----------------------------------------------------------------------------------------------------------------------
 
-Test1.
-Test2 from Engenuics.
-Test3.
+Description:
+This is a user_app1.c file template 
 
 ------------------------------------------------------------------------------------------------------------------------
 API:
 
 Public functions:
-None.
+
 
 Protected System functions:
 void UserApp1Initialize(void)
@@ -28,7 +38,7 @@ Runs current task state.  Should only be called once in main loop.
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
-All Global variable names shall start with "G_"
+All Global variable names shall start with "G_UserApp1"
 ***********************************************************************************************************************/
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                       /* Global state flags */
@@ -41,9 +51,6 @@ extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
-
-extern u8 G_au8DebugScanfBuffer[DEBUG_SCANF_BUFFER_SIZE]; /* From debug.c */
-extern u8 G_u8DebugScanfCharCount;                        /* From debug.c */
 
 
 /***********************************************************************************************************************
@@ -61,7 +68,6 @@ Function Definitions
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Public functions                                                                                                   */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Protected functions                                                                                                */
@@ -81,13 +87,8 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
-  u8 au8UserApp1Start1[] = "LED program task started\n\r";
-  
-  /* Turn off the Debug task command processor and announce the task is ready */
-  DebugSetPassthrough();
-  DebugPrintf(au8UserApp1Start1);
-  
-    /* If good initialization, set state to Idle */
+ 
+  /* If good initialization, set state to Idle */
   if( 1 )
   {
     UserApp1_StateMachine = UserApp1SM_Idle;
@@ -95,7 +96,7 @@ void UserApp1Initialize(void)
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
-    UserApp1_StateMachine = UserApp1SM_FailedInit;
+    UserApp1_StateMachine = UserApp1SM_Error;
   }
 
 } /* end UserApp1Initialize() */
@@ -132,29 +133,20 @@ State Machine Function Definitions
 **********************************************************************************************************************/
 
 /*-------------------------------------------------------------------------------------------------------------------*/
-/* Wait for input */
+/* Wait for ??? */
 static void UserApp1SM_Idle(void)
 {
-  
+
 } /* end UserApp1SM_Idle() */
-                      
-            
-#if 0
+    
+
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* Handle an error */
 static void UserApp1SM_Error(void)          
 {
   
 } /* end UserApp1SM_Error() */
-#endif
 
-
-/*-------------------------------------------------------------------------------------------------------------------*/
-/* State to sit in if init failed */
-static void UserApp1SM_FailedInit(void)          
-{
-    
-} /* end UserApp1SM_FailedInit() */
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
