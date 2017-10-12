@@ -57,7 +57,6 @@ Includes
 #include "buttons.h"
 #include "leds.h" 
 #include "messaging.h"
-#include "timer.h" 
 
 #include "sam3u_i2c.h"
 #include "sam3u_ssp.h"
@@ -67,6 +66,10 @@ Includes
 #ifdef MPGL1
 #include "mpgl1-ehdw-03.h"
 #include "lcd_nhd-c0220biz.h"
+#include "sdcard.h"
+
+//#include "mpgl1_audio_test.h"
+//#include "mpgl1_board_test.h"
 #endif /* MPGL1 */
 
 #ifdef MPGL2
@@ -80,14 +83,17 @@ Includes
 #include "captouch.h"
 #include "lcd_bitmaps.h"
 #include "lcd_NHD-C12864LZ.h"
+
+//#include "mpgl2_board_test.h"
+//#include "pong_atmel.h"
+
 #endif /* MPGL2 */
 
 /* Common application header files */
 #include "debug.h"
 #include "music.h"
-#include "user_app1.h"
-#include "user_app2.h"
-#include "user_app3.h"
+#include "user_app.h"
+
 
 
 /**********************************************************************************************************************

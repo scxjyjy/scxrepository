@@ -2,7 +2,7 @@
 File: main.c                                                                
 
 Description:
-Container for the EiE firmware.  
+Container for the MPG firmware.  
 ***********************************************************************************************************************/
 
 #include "configuration.h"
@@ -32,7 +32,7 @@ Main Program
 Main has two sections:
 
 1. Initialization which is run once on power-up or reset.  All drivers and applications are setup here without timing
-contraints but must complete execution 2regardless of success or failure of starting the application. 
+contraints but must complete execution regardless of success or failure of starting the application. 
 
 2. Super loop which runs infinitely giving processor time to each application.  The total loop time should not exceed
 1ms of execution time counting all application execution.  SystemSleep() will execute to complete the remaining time in
@@ -40,12 +40,12 @@ the 1ms period.
 ***********************************************************************************************************************/
 
 void main(void)
-
 {
   G_u32SystemFlags |= _SYSTEM_INITIALIZING;
+  // Check for watch dog restarts
 
   /* Low level initialization */
-  WatchDogSetup(); /* During development, does not reset processor if timeout */
+  WatchDogSetup(); /* During development, set to not reset processor if timeout */
   GpioSetup();
   ClockSetup();
   InterruptSetup();
@@ -58,7 +58,6 @@ void main(void)
 
   /* Debug messages through DebugPrintf() are available from here */
 
-  TimerInitialize();  
   SspInitialize();
   TWIInitialize();
 
@@ -66,16 +65,17 @@ void main(void)
   LedInitialize();
   ButtonInitialize();
   AntInitialize();
+  SdCardInitialize();
 
   /* Application initialization */
-  UserApp1Initialize();
-  UserApp2Initialize();
-  UserApp3Initialize();
+//  BoardTestInitialize();
+//  AudioTestInitialize();
+    UserAppInitialize();
   
   /* Exit initialization */
   SystemStatusReport();
   G_u32SystemFlags &= ~_SYSTEM_INITIALIZING;
-    
+  
   /* Super loop */  
   while(1)
   {
@@ -85,18 +85,18 @@ void main(void)
     LedUpdate();
     ButtonRunActiveState();
     UartRunActiveState();
-    TimerRunActiveState(); 
     SspRunActiveState();
     TWIRunActiveState();
     MessagingRunActiveState();
     DebugRunActiveState();
     LcdRunActiveState();
     AntRunActiveState();
+    SdCardRunActiveState();
 
     /* Applications */
-    UserApp1RunActiveState();
-    UserApp2RunActiveState();
-    UserApp3RunActiveState();
+    //BoardTestRunActiveState();
+    //AudioTestRunActiveState();
+    UserAppRunActiveState();
     
     /* System sleep*/
     HEARTBEAT_OFF();

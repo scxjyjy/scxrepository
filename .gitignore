@@ -1,9 +1,5 @@
 Debug/
-*.dep
-*.bat
+settings/
 *.TMP
-*.wspos
-doxygen/
-firmware_ascii/
-firmware_common/
-
+firmware_mpg_common/application/user_app_heart_and_soul.c
+firmware_mpg_common/application/user_app_heart_and_soul.h
