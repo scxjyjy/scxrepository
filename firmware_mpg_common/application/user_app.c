@@ -47,7 +47,7 @@ volatile u32 G_u32UserAppFlags;                       /* Global state flags */
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
 extern AntSetupDataType G_stAntSetupData;                         /* From ant.c */
-
+extern AntApplicationMsgListType *G_sAntApplicationMsgList;
 extern u32 G_u32AntApiCurrentDataTimeStamp;                       /* From ant_api.c */
 extern AntApplicationMessageType G_eAntApiCurrentMessageClass;    /* From ant_api.c */
 extern u8 G_au8AntApiCurrentData[ANT_APPLICATION_MESSAGE_BYTES];  /* From ant_api.c */
@@ -169,10 +169,11 @@ State Machine Function Definitions
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
-  static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
+  static u8 au8TestMessage[] = {0x58, 0, 0, 0, 0xFF, 0, 0, 0};
   u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
-  
+  u8 au8MsgTemp[]= "xxxxxxxxxxxxxxxx";
   /* Check all the buttons and update au8TestMessage according to the button state */ 
+#if 0 
   au8TestMessage[0] = 0x00;
   if( IsButtonPressed(BUTTON0) )
   {
@@ -198,6 +199,7 @@ static void UserAppSM_Idle(void)
     au8TestMessage[3] = 0xff;
   }
 #endif /* MPG1 */
+#endif
   
   if( AntReadData() )
   {
@@ -222,6 +224,10 @@ static void UserAppSM_Idle(void)
     else if(G_eAntApiCurrentMessageClass == ANT_TICK)
     {
      /* Update and queue the new message data */
+      for(u8 i=5;i<8;i++)
+      {
+        au8TestMessage[i]=G_sAntApplicationMsgList->au8MessageData[i];
+      }
       au8TestMessage[7]++;
       if(au8TestMessage[7] == 0)
       {
@@ -231,7 +237,13 @@ static void UserAppSM_Idle(void)
           au8TestMessage[5]++;
         }
       }
-      AntQueueBroadcastMessage(au8TestMessage);
+      AntQueueAcknowledgedMessage(au8TestMessage);
+      for(u8 i = 0; i < ANT_DATA_BYTES; i++)
+      {
+        au8MsgTemp[2 * i]     = HexToASCIICharUpper(au8TestMessage[i] / 16);
+        au8MsgTemp[2 * i + 1] = HexToASCIICharUpper(au8TestMessage[i] % 16);
+      }
+      LCDMessage(LINE2_START_ADDR, au8MsgTemp);
     }
   } /* end AntReadData() */
   
