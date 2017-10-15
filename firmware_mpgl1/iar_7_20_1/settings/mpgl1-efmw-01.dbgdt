@@ -82,7 +82,7 @@
           
           
           
-        <item>G_u32SystemTime1ms</item><item>G_u32SystemTime1s</item><item>Msg_Pool</item><item>Msg_StatusQueue</item><item>Leds_asLedArray</item><item>G_sAntApplicationMsgList</item><item>G_eAntApiCurrentMessageClass</item><item>ANT_TICK_MSG_EVENT_CODE_INDEX</item><item>G_au8AntApiCurrentData</item><item></item></expressions>
+        <item>G_u32SystemTime1ms</item><item>G_u32SystemTime1s</item><item>Msg_Pool</item><item>Msg_StatusQueue</item><item>Leds_asLedArray</item><item>G_sAntApplicationMsgList</item><item>G_eAntApiCurrentMessageClass</item><item>ANT_TICK_MSG_EVENT_CODE_INDEX</item><item>G_au8AntApiCurrentData</item><item/></expressions>
         <col-names>
           
           
@@ -99,7 +99,7 @@
       <WATCH_2>
         <expressions>
           
-        <item>G_u32AntApiCurrentDataTimeStamp</item><item>G_eAntApiCurrentMessageClass</item><item>G_au8AntApiCurrentData</item><item>G_sAntApplicationMsgList</item><item>G_au8AntApiCurrentData</item><item>au8TestMessage</item><item>G_eAntApiCurrentMessageClass</item><item></item></expressions>
+        <item>G_u32AntApiCurrentDataTimeStamp</item><item>G_eAntApiCurrentMessageClass</item><item>G_au8AntApiCurrentData</item><item>G_sAntApplicationMsgList</item><item>G_au8AntApiCurrentData</item><item>au8TestMessage</item><item>G_eAntApiCurrentMessageClass</item><item/></expressions>
         <col-names>
           
           
