@@ -312,6 +312,7 @@ static void UserApp1SM_ChannelOpen(void)
   static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
   static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
   static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
+  static u8 au8DbmContent[] = "xxxdbm";
   bool bGotNewData;
 
   /* Check for BUTTON0 to close channel */
@@ -348,7 +349,11 @@ static void UserApp1SM_ChannelOpen(void)
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
     {
       UserApp1_u32DataMsgCount++;
-      
+      s8 dbmtemp=G_sAntApiCurrentMessageExtData.s8RSSI+2*G_sAntApiCurrentMessageExtData.s8RSSI;
+      au8DbmContent[0]='-';
+      au8DbmContent[1]=HexToASCIICharUpper(dbmtemp/16);
+      au8DbmContent[2]=HexToASCIICharUpper(dbmtemp%16);
+      LCDMessage(LINE1_START_ADDR+14,au8DbmContent);
       /* We are synced with a device, so blue is solid */
       LedOff(GREEN);
       LedOn(BLUE);

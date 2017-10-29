@@ -31,8 +31,8 @@ Constants / Definitions
 /* Required constants for ANT channel configuration */
 #define ANT_CHANNEL_USERAPP             ANT_CHANNEL_0         /* Channel 0 - 7 */
 #define ANT_CHANNEL_TYPE_USERAPP        CHANNEL_TYPE_SLAVE    /* ANT SLAVE */
-#define ANT_DEVICEID_LO_USERAPP         (u8)0                 /* Low byte of two-byte Device # */
-#define ANT_DEVICEID_HI_USERAPP         (u8)0                 /* High byte of two-byte Device # */
+#define ANT_DEVICEID_LO_USERAPP         (u8)04                 /* Low byte of two-byte Device # */
+#define ANT_DEVICEID_HI_USERAPP         (u8)04                 /* High byte of two-byte Device # */
 #define ANT_DEVICE_TYPE_USERAPP         (u8)0                 /* 1 - 255 */
 #define ANT_TRANSMISSION_TYPE_USERAPP   (u8)0                 /* 1-127 (MSB is pairing bit) */
 #define ANT_CHANNEL_PERIOD_LO_USERAPP   (u8)0x00              /* Low byte of two-byte channel period 0x0001 - 0x7fff */
