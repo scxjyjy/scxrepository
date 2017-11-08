@@ -1,13 +1,24 @@
 /**********************************************************************************************************************
-File: user_app3.h                                                                
+File: user_app.h                                                                
+
+----------------------------------------------------------------------------------------------------------------------
+To start a new task using this user_app as a template:
+1. Follow the instructions at the top of user_app.c
+2. Use ctrl-h to find and replace all instances of "user_app" with "yournewtaskname"
+3. Use ctrl-h to find and replace all instances of "UserApp" with "YourNewTaskName"
+4. Use ctrl-h to find and replace all instances of "USER_APP" with "YOUR_NEW_TASK_NAME"
+5. Add #include yournewtaskname.h" to configuration.h
+6. Add/update any special configurations required in configuration.h (e.g. peripheral assignment and setup values)
+7. Delete this text (between the dashed lines)
+----------------------------------------------------------------------------------------------------------------------
 
 Description:
-Header file for user_app3.c
+Header file for yournewtaskname.c
 
 **********************************************************************************************************************/
 
-#ifndef __USER_APP3_H
-#define __USER_APP3_H
+#ifndef __USER_APP_H
+#define __USER_APP_H
 
 /**********************************************************************************************************************
 Type Definitions
@@ -17,7 +28,11 @@ Type Definitions
 /**********************************************************************************************************************
 Constants / Definitions
 **********************************************************************************************************************/
+#define  BUZZER1_ON  /* Right "hand" plays */
 
+#ifdef MPGL1
+#define  BUZZER2_ON   /* Left "hand" plays */
+#endif /* MPGL1 */
 
 /**********************************************************************************************************************
 Function Declarations
@@ -31,8 +46,8 @@ Function Declarations
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Protected functions                                                                                                */
 /*--------------------------------------------------------------------------------------------------------------------*/
-void UserApp3Initialize(void);
-void UserApp3RunActiveState(void);
+void UserAppInitialize(void);
+void UserAppRunActiveState(void);
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -43,13 +58,12 @@ void UserApp3RunActiveState(void);
 /***********************************************************************************************************************
 State Machine Declarations
 ***********************************************************************************************************************/
-static void UserApp3SM_Idle(void);    
+static void UserAppSM_Idle(void);             
+static void UserAppSM_Error(void);         
+static void UserAppSM_FailedInit(void);        
 
-static void UserApp3SM_Error(void);         
-static void UserApp3SM_FailedInit(void);        
 
-
-#endif /* __USER_APP3_H */
+#endif /* __USER_APP_H */
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/

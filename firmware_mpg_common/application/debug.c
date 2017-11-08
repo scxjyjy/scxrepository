@@ -1,9 +1,9 @@
-/*!**********************************************************************************************************************
-@file debug.c 
-@brief Debugging functions and state machine.  
+/***********************************************************************************************************************
+File: debug.c                                                                
 
-Since the system is small, debugger commands will be strictly numerical, 
-though each command will have a string name that can
+Description:
+Debugging functions and state machine.  Since the system is small, debugger commands
+will be strictly numerical, though each command will have a string name that can
 be requested by the user.  The debugger will print a list of these commands if 
 requested using en+c00.  Commands range from 01 to 99 (must include the leading 0
 for single-digit commands) and all commands must have the prefix en+c. 
@@ -16,37 +16,35 @@ The terminal program used to interface to the debugger should be set to:
 - send "CR" for new line
 - 115200-8-N-1
 
+
+------------------------------------------------------------------------------------------------------------------------
+API:
+Types: none
+
+Public:
+u32 DebugPrintf(u8* u8String_)
+Queues the string pointed to by u8String_ to the Debug port.  The string must be
+null-terminated.  It may also contain control charactesr like newline (\n) and line feed (\f)
+e.g.
+u8 u8String[] = "A string to print.\n\r"
+DebugPrintf(u8String);
+
+void DebugLineFeed(void)
+Queues a <CR><LF> sequence to the debug UART.
+e.g.
+DebugLineFeed();
+
+void DebugPrintNumber(u32 u32Number_)
+Formats a long into an ASCII string and queues to print.  Leading zeros are not printed.
+e.g.
+u32 u32Number = 1234567;
+DebugPrintNumber(u32Number);
+
+
 DISCLAIMER: THIS CODE IS PROVIDED WITHOUT ANY WARRANTY OR GUARANTEES.  USERS MAY
 USE THIS CODE FOR DEVELOPMENT AND EXAMPLE PURPOSES ONLY.  ENGENUICS TECHNOLOGIES
 INCORPORATED IS NOT RESPONSIBLE FOR ANY ERRORS, OMISSIONS, OR DAMAGES THAT COULD
 RESULT FROM USING THIS FIRMWARE IN WHOLE OR IN PART.
-
-------------------------------------------------------------------------------------------------------------------------
-GLOBALS
-- G_au8DebugScanfBuffer[] is the DebugScanf() input buffer that can be read directly.
-It is cleared whenever DebugScanf() is called.
-- G_u8DebugScanfCharCount holds number of characters in Debug_au8ScanfBuffer.
-It is cleared whenever DebugScanf() is called.
-
-Copy the following into your task in section global "Existing variables":
-
-extern u8 G_au8DebugScanfBuffer[DEBUG_SCANF_BUFFER_SIZE]; // From debug.c
-
-extern u8 G_u8DebugScanfCharCount;                        // From debug.c
-
-CONSTANTS
-- DEBUG_SCANF_BUFFER_SIZE is the size of G_au8DebugScanfBuffer and thus the max of G_u8DebugScanfCharCount
-
-TYPES
-- NONE
-
-PUBLIC FUNCTIONS
-- u32 DebugPrintf(u8* u8String_)
-- void DebugLineFeed(void)
-- void DebugPrintNumber(u32 u32Number_)
-- u8 DebugScanf(u8* au8Buffer_)
-- void DebugSetPassthrough(void)
-- void DebugClearPassthrough(void)
 
 ***********************************************************************************************************************/
 
@@ -54,50 +52,49 @@ PUBLIC FUNCTIONS
 
 /***********************************************************************************************************************
 Global variable definitions with scope across entire project.
-All Global variable names shall start with "G_xxDebug"
+All Global variable names shall start with "G_"
 ***********************************************************************************************************************/
 /* New variables */
-u32 G_u32DebugFlags;                                   /*!< Debug flag register */
-
-u8 G_au8DebugScanfBuffer[DEBUG_SCANF_BUFFER_SIZE];     /*!< Space to latch characters for DebugScanf() */
-u8 G_u8DebugScanfCharCount = 0;                        /*!< Counter for # of characters in Debug_au8ScanfBuffer */
+u32 G_u32DebugFlags;                                     /* Debug flag register */
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
-extern volatile u32 G_u32SystemTime1ms;                /*!< From main.c */
-extern volatile u32 G_u32SystemTime1s;                 /*!< From main.c */
-extern volatile u32 G_u32SystemFlags;                  /*!< From main.c */
-extern volatile u32 G_u32ApplicationFlags;             /*!< From main.c */
+extern volatile u32 G_u32SystemFlags;                    /* From main.c */
+extern volatile u32 G_u32ApplicationFlags;               /* From main.c */
 
-extern u8 G_au8UtilMessageON[];                        /*!< From utilities.c */
-extern u8 G_au8UtilMessageOFF[];                       /*!< From utilities.c */
+extern volatile u32 G_u32SystemTime1ms;                  /* From board-specific source file */
+extern volatile u32 G_u32SystemTime1s;                   /* From board-specific source file */
+
+extern u8 G_au8MessageOK[];                              /* From utilities.c */
+extern u8 G_au8MessageFAIL[];                            /* From utilities.c */
+extern u8 G_au8MessageON[];                              /* From utilities.c */
+extern u8 G_au8MessageOFF[];                             /* From utilities.c */
 
 
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
-Variable names shall start with "Debug_xx" and be declared as static.
+Variable names shall start with "Debug_" and be declared as static.
 ***********************************************************************************************************************/
-static fnCode_type Debug_pfnStateMachine;                /*!< The Debug state machine function pointer */
-//static u32 Debug_u32Timeout;                           /*!< Timeout counter used across states */
+static fnCode_type Debug_pfnStateMachine;                /* The Debug state machine function pointer */
 
-static UartPeripheralType* Debug_Uart;                   /*!< Pointer to debug UART peripheral object */
-static u32 Debug_u32CurrentMessageToken;                 /*!< Token for current message */
-static u8 Debug_u8ErrorCode;                             /*!< Error code */
+static UartPeripheralType* Debug_Uart;                   /* Pointer to debug UART peripheral object */
+static u32 Debug_u32CurrentMessageToken;                 /* Token for current message */
+static u8 Debug_u8ErrorCode;                             /* Error code */
 
-static u8 Debug_au8RxBuffer[DEBUG_RX_BUFFER_SIZE];       /*!< Space for incoming characters of debug commands */
-static u8 *Debug_pu8RxBufferNextChar;                    /*!< Pointer to next spot in the Rxbuffer */
-static u8 *Debug_pu8RxBufferParser;                      /*!< Pointer to loop through the Rx buffer */
+static u8 Debug_au8RxBuffer[DEBUG_RX_BUFFER_SIZE];       /* Space for incoming characters of debug commands */
+static u8 *Debug_pu8RxBufferNextChar;                    /* Pointer to next spot in the Rxbuffer */
+static u8 *Debug_pu8RxBufferParser;                      /* Pointer to loop through the Rx buffer */
 
-static u8 Debug_au8CommandBuffer[DEBUG_CMD_BUFFER_SIZE]; /*!< Space to store chars as they build up to the next command */ 
-static u8 *Debug_pu8CmdBufferNextChar;                   /*!< Pointer to incoming char location in the command buffer */
-static u16 Debug_u16CommandSize;                         /*!< Number of characters in the command buffer */
+static u8 Debug_au8CommandBuffer[DEBUG_CMD_BUFFER_SIZE]; /* Space to store chars as they build up to the next command */ 
+static u8 *Debug_pu8CmdBufferNextChar;                   /* Pointer to incoming char location in the command buffer */
+static u16 Debug_u16CommandSize;                         /* Number of characters in the command buffer */
 
-static u8 Debug_u8Command;                               /*!< A validated command number */
+static u8 Debug_u8Command;                               /* A validated command number */
 
-/*! Add commands by updating debug.h in the Command-Specific Definitions section, then update this list
+/* Add commands by updating debug.h in the Command-Specific Definitions section, then update this list
 with the function name to call for the corresponding command: */
-#ifdef EIE1
+#ifdef MPGL1
 DebugCommandType Debug_au8Commands[DEBUG_COMMANDS] = { {DEBUG_CMD_NAME00, DebugCommandPrepareList},
                                                        {DEBUG_CMD_NAME01, DebugCommandLedTestToggle},
                                                        {DEBUG_CMD_NAME02, DebugCommandSysTimeToggle},
@@ -108,8 +105,10 @@ DebugCommandType Debug_au8Commands[DEBUG_COMMANDS] = { {DEBUG_CMD_NAME00, DebugC
                                                        {DEBUG_CMD_NAME07, DebugCommandDummy} 
                                                      };
 
-static u8 Debug_au8StartupMsg[] = "\n\n\r*** RAZOR SAM3U2 ASCII LCD DEVELOPMENT BOARD ***\n\n\r";
-#endif /* EIE1 */
+static bool Debug_bLedTestActive = TRUE;
+
+static u8 Debug_au8StartupMsg[] = "\n\n\r*** RAZOR SAM3U2 ASCII LCD DEVELOPMENT BOARD ***\n\rDebug ready\n\r";
+#endif /* MPGL1 */
 
 #ifdef MPGL2
 DebugCommandType Debug_au8Commands[DEBUG_COMMANDS] = { {DEBUG_CMD_NAME00, DebugCommandPrepareList},
@@ -122,7 +121,8 @@ DebugCommandType Debug_au8Commands[DEBUG_COMMANDS] = { {DEBUG_CMD_NAME00, DebugC
                                                        {DEBUG_CMD_NAME07, DebugCommandDummy} 
                                                      };
 
-static u8 Debug_au8StartupMsg[] = "\n\n\r*** RAZOR SAM3U2 DOT MATRIX DEVELOPMENT BOARD ***\n\n\r";
+static bool Debug_bLedTestActive = TRUE;
+static u8 Debug_au8StartupMsg[] = "\n\n\r*** RAZOR SAM3U2 DOT MATRIX DEVELOPMENT BOARD ***\n\rDebug ready\n\r";
 #endif /* MPGL2 */
 
 
@@ -131,30 +131,22 @@ static u8 Debug_au8StartupMsg[] = "\n\n\r*** RAZOR SAM3U2 DOT MATRIX DEVELOPMENT
 ***********************************************************************************************************************/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/*! @publicsection */                                                                                            
+/* Public Functions */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn u32 DebugPrintf(u8* u8String_)
+/*----------------------------------------------------------------------------------------------------------------------
+Function: DebugPrintf
 
-@brief Queues the string pointed to by u8String_ to the Debug port.  
-
-The string must be null-terminated.  It may also contain control characters 
-like newline (\n) and linefeed (\f)
-
-Example:
-u8 u8String[] = "A string to print.\n\r"
-
-DebugPrintf(u8String);
+Description:
+Sends a text string to the debug UART.
 
 Requires:
+  - u8String_ is a NULL-terminated C-string
   - The debug UART resource has been setup for the debug application.
-@param u8String_ is a NULL-terminated C-string
 
 Promises:
   - The string is queued to the debug UART.
   - The message token is returned
-
 */
 u32 DebugPrintf(u8* u8String_)
 {
@@ -171,20 +163,17 @@ u32 DebugPrintf(u8* u8String_)
 } /* end DebugPrintf() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugLineFeed(void)
+/*----------------------------------------------------------------------------------------------------------------------
+Function: DebugLineFeed
 
-@brief Queues a <CR><LF> sequence to the debug UART.  
-
-This is slightly more efficient than calling DebugPrintf("\n\r");
-
+Description:
+Queues a <CR><LF> sequence to the debug UART.
 
 Requires:
-  - NONE
+  -
 
 Promises:
-  - <CR><LF> sequence is sent to the debug UART
-
+  - <CR><LF> sequence to the debug UART
 */
 void DebugLineFeed(void)
 {
@@ -195,27 +184,17 @@ void DebugLineFeed(void)
 } /* end DebugLineFeed() */
 
 
-/*!-----------------------------------------------------------------------------/
-@fn void DebugPrintNumber(u32 u32Number_)
+/*-----------------------------------------------------------------------------/
+Function: DebugPrintNumber
 
-@brief Formats a long into an ASCII string and queues to print.  
-
-Leading zeros are not printed. Unsigned (positive) values only.
-
-Example:
-
-u32 u32Number = 1234567;
-
-DebugPrintNumber(u32Number);
-
+Description:
+Formats a long into an ASCII string and queues to print
 
 Requires:
   - Enough space is available on the heap to temporarily store the number array
-@param u32Number_ is the number to print.
 
 Promises:
   - The number is converted to an array of ascii without leading zeros and sent to UART
-
 */
 void DebugPrintNumber(u32 u32Number_)
 {
@@ -268,141 +247,33 @@ void DebugPrintNumber(u32 u32Number_)
 } /* end DebugDebugPrintNumber() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn u8 DebugScanf(u8* au8Buffer_)
+/*----------------------------------------------------------------------------------------------------------------------
+Function: SystemStatusReport
 
-@brief Copies G_u8DebugScanfCharCount characters from G_au8DebugScanfBuffer to a target array 
-so the input can be saved.  
-
-Once copied, G_au8DebugScanfBuffer is cleared and G_u8DebugScanfCharCount is zeroed.
-Note that the debug task is blocked here so new characters are not added while
-the function executes.
-
-Example:
-
-u8 u8MyBuffer[SCANF_BUFFER_SIZE]
-
-u8 u8NumChars;
-
-u8NumChars = DebugScanf(u8MyBuffer);
-
+Description:
+Reports if system is good or not.
 
 Requires:
-@param G_u8DebugScanfCharCount holds the number of characters in the G_au8DebugScanfBuffer
-@param au8Buffer_ points to an array large enough to hold G_u8DebugScanfCharCount characters
+  - G_u32SystemFlags up to date with system status
+  - New tasks should be added to the check list below including in the message string for the task name
+  - The system is in initialization state so MsgSenderForceSend() is used
+    to output each meassage after it is queued.
 
 Promises:
-@param au8Buffer_ receives G_u8DebugScanfCharCount characters 
-@param G_au8DebugScanfBuffer[i] = '\0', where 0 <= i <= DEBUG_SCANF_BUFFER_SIZE
-@param G_u8DebugScanfCharCount = 0
-*/
-u8 DebugScanf(u8* au8Buffer_)
-{
-  u8 u8Temp = G_u8DebugScanfCharCount;
-  
-  /* Copy the characters, clearing as we go */
-  for(u8 i = 0; i < G_u8DebugScanfCharCount; i++)
-  {
-    *(au8Buffer_ + i) = G_au8DebugScanfBuffer[i];
-    G_au8DebugScanfBuffer[i] = '\0';
-  }
-  
-  G_u8DebugScanfCharCount = 0;
-  return u8Temp;
-  
-} /* end DebugScanf() */
-
-
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugSetPassthrough(void)
-
-@brief Puts the Debug task in Passthrough mode.
-
-ALL characters received are put in to the Scanf buffer and
-the Debug task does not look for input for the menu system. 
-This allows task to have full access to 
-terminal input without the Debug task printing messages or 
-stealing Backspace characters.
-
-Passthrough mode does NOT disable any other Debug functions that 
-have already been enabled.  For example, if you want the 1ms timing 
-violation warning you can enable this and then enable Passthrough mode.
-
-
-Requires:
-  - NONE
-
-Promises:
-@param G_u32DebugFlags _DEBUG_PASSTHROUGH is set
-
-*/
-void DebugSetPassthrough(void)
-{
-  G_u32DebugFlags |= _DEBUG_PASSTHROUGH;
-  
-  DebugPrintf("\n\n\r***Debug Passthrough enabled***\n\n\r");
-
-} /* end DebugSetPassthrough */
-
-
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugClearPassthrough(void)
-
-@brief Takes the Debug task out of Passthrough mode.
-
-Requires:
-  - NONE
-
-Promises:
-@param G_u32DebugFlags _DEBUG_PASSTHROUGH is cleared
-
-*/
-void DebugClearPassthrough(void)
-{
-  G_u32DebugFlags &= ~_DEBUG_PASSTHROUGH;
-  
-  DebugPrintf("\n\n\r***Debug Passthrough disabled***\n\n\r");
-  
-} /* end DebugClearPassthrough */
-
-
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void SystemStatusReport(void)
-
-@brief Reports system-level messages from the Debug task.
-
-Right now, the system status is limited to the start-up results of each task. 
-However if a task crashes or reaches an unknown state, it can change its
-status flag and then SystemStatus report could display this.  
-
-When a new task is added:
-- G_u32ApplicationFlags (configuration.h) should get a new flag for the task
-- NUMBER_APPLICATIONS (configuration.h) should be incremented
-- aau8AppShortNames list should get a message string for the task name. This
-list must match the order of the flags in G_u32ApplicationFlags.
-
-This function can be used if the system is in initialization state 
-
-
-Requires:
-@param G_u32SystemFlags up to date with system status
-
-Promises:
-  - Prints out messages for any system test that failed
+  - Prints out messages for any system tests that failed
   - Prints out overall good message if all tests passed
-  - Prints instructions to access the Debug menu
-
 */
 void SystemStatusReport(void)
 {
-  u8 au8SystemPassed[] = "No failed tasks.";
+
+  u8 au8SystemPassed[] = "NONE";
   u8 au8SystemReady[] = "\n\rInitialization complete. Type en+c00 for debug menu.  Failed tasks:\n\r";
   u32 u32TaskFlagMaskBit = (u32)0x01;
   bool bNoFailedTasks = TRUE;
 
-#ifdef EIE1
+#ifdef MPGL1
   u8 aau8AppShortNames[NUMBER_APPLICATIONS][MAX_TASK_NAME_SIZE] = {"LED", "BUTTON", "DEBUG", "LCD", "ANT", "SD"};
-#endif /* EIE1 */
+#endif /* MPGL1 */
 
 #ifdef MPGL2
   u8 aau8AppShortNames[NUMBER_APPLICATIONS][MAX_TASK_NAME_SIZE] = {"LED", "BUTTON", "DEBUG", "LCD", "ANT", "CAPTOUCH"};
@@ -434,27 +305,23 @@ void SystemStatusReport(void)
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/*! @protectedsection */                                                                                            
+/* Protected Functions */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugInitialize(void)
+/*----------------------------------------------------------------------------------------------------------------------
+Function: DebugInitialize
 
-@brief Sets up the debug command list and activates the debug functionality.
-
-Should only be called once in main init section.
-
+Description:
+Sets up the debug command list and activates the debug functionality.
 
 Requires:
   - The debug application is not yet running
   - The UART resource requested should be free
 
 Promises:
-- Debug_au8RxBuffer[] initialized to all 0
-@param Debug_pu8CmdBufferCurrentChar set to Debug_au8RxBuffer[0]
-@param Debug_pu8RxBufferParser set to Debug_au8RxBuffer[0]
-@param Debug_pfnStateMachine set to Idle
-
+  - UART resource Debug_au8RxBuffer initialized to all 0
+  - Buffer pointers Debug_pu8CmdBufferCurrentChar and Debug_pu8RxBufferParser set to the start of the buffer
+  - Debug_pfnStateMachine set to Idle
 */
 void DebugInitialize(void)
 {
@@ -464,13 +331,6 @@ void DebugInitialize(void)
   for (u16 i = 0; i < DEBUG_RX_BUFFER_SIZE; i++)
   {
     Debug_au8RxBuffer[i] = 0;
-  }
-
-  /* Clear the scanf buffer and counter */
-  G_u8DebugScanfCharCount = 0;
-  for (u8 i = 0; i < DEBUG_SCANF_BUFFER_SIZE; i++)
-  {
-    G_au8DebugScanfBuffer[i] = 0;
   }
 
   /* Initailze startup values and the command array */
@@ -497,7 +357,6 @@ void DebugInitialize(void)
   else
   {
     DebugPrintf(Debug_au8StartupMsg);   
-    
     G_u32ApplicationFlags |= _APPLICATION_FLAGS_DEBUG;
     Debug_pfnStateMachine = DebugSM_Idle;
   }
@@ -505,19 +364,19 @@ void DebugInitialize(void)
 } /* end  DebugInitialize() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugRunActiveState(void)
+/*----------------------------------------------------------------------------------------------------------------------
+Function DebugRunActiveState()
 
-@brief Selects and runs one iteration of the current state in the state machine.
-
+Description:
+Selects and runs one iteration of the current state in the state machine.
 All state machines have a TOTAL of 1ms to execute, so on average n state machines
 may take 1ms / n to execute.
 
 Requires:
-- State machine function pointer points at current state
+  - State machine function pointer points at current state
 
 Promises:
-- Calls the function to pointed by the state machine function pointer
+  - Calls the function to pointed by the state machine function pointer
 */
 void DebugRunActiveState(void)
 {
@@ -526,18 +385,17 @@ void DebugRunActiveState(void)
 } /* end DebugRunActiveState */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugRxCallback(void)
+/*----------------------------------------------------------------------------------------------------------------------
+Function DebugRxCallback()
 
-@brief Call back function used when character received.
-
+Description:
+Call back function used when character received.
 
 Requires:
   - None
 
 Promises:
-@param Debug_pu8RxBufferNextChar is advanced safely
-
+  - Safely advances Debug_pu8RxBufferNextChar.
 */
 void DebugRxCallback(void)
 {
@@ -551,23 +409,22 @@ void DebugRxCallback(void)
 } /* end DebugRxCallback() */
 
 
-/*------------------------------------------------------------------------------------------------------------------*/
-/*! @privatesection */                                                                                            
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* Private Functions */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn static void DebugCommandPrepareList(void)
+/*----------------------------------------------------------------------------------------------------------------------
+Function DebugCommandPrepareList
 
-@brief Queues the entire list of debug commands available in the system so 
-they will be sent out the debug UART for the user to view.
-
+Description:
+Queues the entire list of debug commands available in the system so they will
+be sent out the debug UART for the user to view.
 
 Requires:
   - Message Sender application is running
 
 Promises:
   - Command numbers and names of all installed commands are queued to messagesender.
-
 */
 static void DebugCommandPrepareList(void)
 {
@@ -579,7 +436,6 @@ static void DebugCommandPrepareList(void)
   au8CommandLine[3] = ' ';
   au8CommandLine[DEBUG_CMD_PREFIX_LENGTH + DEBUG_CMD_NAME_LENGTH] = '\n';
   au8CommandLine[DEBUG_CMD_PREFIX_LENGTH + DEBUG_CMD_NAME_LENGTH + 1] = '\r';
-  au8CommandLine[DEBUG_CMD_PREFIX_LENGTH + DEBUG_CMD_NAME_LENGTH + 2] = '\0';
 
   /* Prepare a nicely formatted list of commands */
   DebugPrintf(au8ListHeading);
@@ -612,27 +468,15 @@ static void DebugCommandPrepareList(void)
 
   DebugLineFeed();
   
-} /* end DebugCommandPrepareList() */
+} /* end DebugCommand0PrepareList() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn static void DebugCommandDummy(void)
 
-@brief A command place-holder.
+/*----------------------------------------------------------------------------------------------------------------------
+Function: DebugCommandDummy
 
-Use this function when adding new commands that do not exist yet.  This is 
-handy if you are out of space in the command list and might as well add a 
-group of new commands instead of just one.  Or perhaps you just need a
-temporary place holder.
-
-
-Requires:
-- NONE
-
-Promises:
-- A string is printed to tell the user they are using a command 
-that does not exist.
-
+Description:
+A command place-holder.
 */
 static void DebugCommandDummy(void)
 {
@@ -643,20 +487,12 @@ static void DebugCommandDummy(void)
 } /* end DebugCommandDummy() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn static void DebugCommandLedTestToggle(void)
+/*----------------------------------------------------------------------------------------------------------------------
+Function: DebugCommandLedTestToggle
 
-@brief Toggles and reports the active state of the LED test.
-
-This implementation is specific to the target hardware.
-
-
-Requires:
-- NONE
-
-Promises:
-@param G_u32DebugFlags flag _DEBUG_LED_TEST_ENABLE is toggled
-
+Description:
+Toggles the active state of the LED test which allows typed characters corresponding to LED colors
+to toggle those LEDs on or off.
 */
 static void DebugCommandLedTestToggle(void)
 {
@@ -667,332 +503,137 @@ static void DebugCommandLedTestToggle(void)
   if(G_u32DebugFlags & _DEBUG_LED_TEST_ENABLE)
   {
     G_u32DebugFlags &= ~_DEBUG_LED_TEST_ENABLE;
-    DebugPrintf(G_au8UtilMessageOFF);
+    DebugPrintf(G_au8MessageOFF);
   }
   else
   {
     G_u32DebugFlags |= _DEBUG_LED_TEST_ENABLE;
-    DebugPrintf(G_au8UtilMessageON);
-    
-#ifdef EIE1
-    LedOn(WHITE);
-    LedOn(PURPLE);
-    LedOn(BLUE);
-    LedOn(CYAN);
-    LedOn(GREEN);
-    LedOn(YELLOW);
-    LedOn(ORANGE);
-    LedOn(RED);
-#endif /* EIE1 */   
-    
-#ifdef MPGL2
-#ifdef MPGL2_R01
-    LedOn(BLUE);
-    LedOn(GREEN);
-    LedOn(YELLOW);
-    LedOn(RED);
-#else
-    LedOn(BLUE0);
-    LedOn(BLUE1);
-    LedOn(BLUE2);
-    LedOn(BLUE3);
-    LedOn(RED0);
-    LedOn(RED1);
-    LedOn(RED2);
-    LedOn(RED3);
-    LedOn(GREEN0);
-    LedOn(GREEN1);
-    LedOn(GREEN2);
-    LedOn(GREEN3);
-#endif /* MPGL2_R01 */
-#endif /* MPGL2 */
+    DebugPrintf(G_au8MessageON);
   }
   
 } /* end DebugCommandLedTestToggle() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn static void DebugLedTestCharacter(u8 u8Char_)
+/*----------------------------------------------------------------------------------------------------------------------
+Function: DebugLedTestCharacter
 
-@brief Checks the character and toggles associated LED if applicable.
-
-Only responds to UPPER CASE characters.
+Description:
+Checks the character and toggles associated LED if applicable.
 This implementation is specific to the target hardware.
 
-For EIE1 / MPGL1: W, P, B, C, G, Y, O, R
-
-For MPGL2 R01: B, G, Y, R
-
-For EIE1 / MPGL1: W, P, K (PINK), B, C, G, Y, O, R (all four LEDs are lit)
-
 Requires:
-@param u8Char_ is the character to check
+  - u8Char_ is the character to check
 
 Promises:
   - If u8Char_ is a valid toggling character, the corresponding LED will be toggled.
-
 */
 static void DebugLedTestCharacter(u8 u8Char_)
 {
-  LedNumberType eLed;
-  bool bValidLed = TRUE;
-  
   /* Check the char to see if an LED should be toggled */  
-#ifdef EIE1
-  switch (u8Char_)
+#ifdef MPGL1
+  if(u8Char_ == 'W')
   {
-    case 'W':
-    {
-      eLed = WHITE;
-      break;
-    }  
+    LedToggle(WHITE);
+  }  
 
-    case 'P':
-    {
-      eLed = PURPLE;
-      break;
-    }  
-
-    case 'B':
-    {
-      eLed = BLUE;
-      break;
-    }  
-
-    case 'C':
-    {
-      eLed = CYAN;
-      break;
-    }  
-
-    case 'G':
-    {
-      eLed = GREEN;
-      break;
-    }  
-
-    case 'Y':
-    {
-      eLed = YELLOW;
-      break;
-    }  
-
-    case 'O':
-    {
-      eLed = ORANGE;
-      break;
-    }  
-
-    case 'R':
-    {
-      eLed = RED;
-      break;
-    }  
-    
-  default:
-    {
-      bValidLed = FALSE;
-      break;
-    }
-  } /* end switch */
-  
-  if(bValidLed)
+  if(u8Char_ == 'P')
   {
-    LedToggle(eLed);
-  }
+    LedToggle(PURPLE);
+  } 
 
-#endif /* EIE1 */
+  if(u8Char_ == 'B')
+  {
+    LedToggle(BLUE);
+  } 
+
+  if(u8Char_ == 'C')
+  {
+    LedToggle(CYAN);
+  } 
+
+  if(u8Char_ == 'G')
+  {
+    LedToggle(GREEN);
+  } 
+
+  if(u8Char_ == 'Y')
+  {
+    LedToggle(YELLOW);
+  } 
+
+  if(u8Char_ == 'O')
+  {
+    LedToggle(ORANGE);
+  } 
+
+  if(u8Char_ == 'R')
+  {
+    LedToggle(RED);
+  } 
+
+#endif /* MPGL1 */
   
 #ifdef MPGL2
   
 #ifdef MPGL2_R01
-  switch (u8Char_)
+  if(u8Char_ == 'B')
   {
-    case 'B':
-    {
-      eLed = BLUE;
-      break;
-    }  
+    LedToggle(BLUE);
+  } 
 
-    case 'G':
-    {
-      eLed = GREEN;
-      break;
-    }  
-
-    case 'Y':
-    {
-      eLed = YELLOW;
-      break;
-    }  
-
-    case 'R':
-    {
-      eLed = RED;
-      break;
-    }  
-    
-  default:
-    {
-      bValidLed = FALSE;
-      break;
-    }
-  } /* end switch */
-
-  if(bValidLed)
+  if(u8Char_ == 'G')
   {
-    LedToggle(eLed);
-  }
+    LedToggle(GREEN);
+  } 
+
+  if(u8Char_ == 'Y')
+  {
+    LedToggle(YELLOW);
+  } 
+
+  if(u8Char_ == 'R')
+  {
+    LedToggle(RED);
+  } 
   
 #else
-  LedOff(RED0);
-  LedOff(RED1);
-  LedOff(RED2);
-  LedOff(RED3);
-  LedOff(GREEN0);
-  LedOff(GREEN1);
-  LedOff(GREEN2);
-  LedOff(GREEN3);
-  LedOff(BLUE0);
-  LedOff(BLUE1);
-  LedOff(BLUE2);
-  LedOff(BLUE3);
 
-  switch (u8Char_)
+  if(u8Char_ == 'B')
   {
-    case 'W':
-    {
-      LedOn(RED0);
-      LedOn(RED1);
-      LedOn(RED2);
-      LedOn(RED3);
-      LedOn(GREEN0);
-      LedOn(GREEN1);
-      LedOn(GREEN2);
-      LedOn(GREEN3);
-      LedOn(BLUE0);
-      LedOn(BLUE1);
-      LedOn(BLUE2);
-      LedOn(BLUE3);
-      break;
-    }  
+    LedToggle(BLUE0);
+    LedToggle(BLUE1);
+    LedToggle(BLUE2);
+    LedToggle(BLUE3);
+  }  
 
-    case 'P':
-    {
-      LedPWM(RED0, LED_PWM_50);
-      LedPWM(RED1, LED_PWM_50);
-      LedPWM(RED2, LED_PWM_50);
-      LedPWM(RED3, LED_PWM_50);
-      LedOn(BLUE0);
-      LedOn(BLUE1);
-      LedOn(BLUE2);
-      LedOn(BLUE3);
-      break;
-    }  
-
-    case 'K':
-    {
-      LedOn(RED0);
-      LedOn(RED1);
-      LedOn(RED2);
-      LedOn(RED3);
-      LedPWM(BLUE0, LED_PWM_50);
-      LedPWM(BLUE1, LED_PWM_50);
-      LedPWM(BLUE2, LED_PWM_50);
-      LedPWM(BLUE3, LED_PWM_50);
-      break;
-    }  
-
-    case 'B':
-    {
-      LedOn(BLUE0);
-      LedOn(BLUE1);
-      LedOn(BLUE2);
-      LedOn(BLUE3);
-      break;
-    }  
-
-    case 'C':
-    {
-      LedOn(GREEN0);
-      LedOn(GREEN1);
-      LedOn(GREEN2);
-      LedOn(GREEN3);
-      LedOn(BLUE0);
-      LedOn(BLUE1);
-      LedOn(BLUE2);
-      LedOn(BLUE3);
-      break;
-    }  
-
-    case 'G':
-    {
-      LedOn(GREEN0);
-      LedOn(GREEN1);
-      LedOn(GREEN2);
-      LedOn(GREEN3);
-      break;
-    }  
-
-    case 'Y':
-    {
-      LedOn(RED0);
-      LedOn(RED1);
-      LedOn(RED2);
-      LedOn(RED3);
-      LedOn(GREEN0);
-      LedOn(GREEN1);
-      LedOn(GREEN2);
-      LedOn(GREEN3);
-      break;
-    }  
-
-    case 'O':
-    {
-      LedOn(RED0);
-      LedOn(RED1);
-      LedOn(RED2);
-      LedOn(RED3);
-      LedPWM(GREEN0, LED_PWM_50);
-      LedPWM(GREEN1, LED_PWM_50);
-      LedPWM(GREEN2, LED_PWM_50);
-      LedPWM(GREEN3, LED_PWM_50);
-      break;
-    }  
-
-    case 'R':
-    {
-      LedToggle(RED0);
-      LedToggle(RED1);
-      LedToggle(RED2);
-      LedToggle(RED3);
-      break;
-    }  
-    
-  default:
-    {
-      break;
-    }
-  } /* end switch */
-   
+  if(u8Char_ == 'R')
+  {
+    LedToggle(RED0);
+    LedToggle(RED1);
+    LedToggle(RED2);
+    LedToggle(RED3);
+  }  
+  
+  if(u8Char_ == 'G')
+  {
+    LedToggle(GREEN0);
+    LedToggle(GREEN1);
+    LedToggle(GREEN2);
+    LedToggle(GREEN3);
+  }  
+ 
 #endif /* MPGL2_R01 */
 #endif /* MPGL2 */
-
   
 } /* end DebugCommandLedTestToggle() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn static void DebugCommandSysTimeToggle(void)
+/*----------------------------------------------------------------------------------------------------------------------
+Function: DebugCommandSysTimeToggle
 
-@brief Toggles the active state of the 1ms violation warning.
-
-Requires:
-- NONE
-
-Promises:
-@param G_u32DebugFlags flag _DEBUG_TIME_WARNING_ENABLE is toggled
-
+Description:
+Toggles the active state of the LED test which allows typed characters corresponding to LED colors
+to toggle those LEDs on or off.
 */
 static void DebugCommandSysTimeToggle(void)
 {
@@ -1003,47 +644,40 @@ static void DebugCommandSysTimeToggle(void)
   if(G_u32DebugFlags & _DEBUG_TIME_WARNING_ENABLE)
   {
     G_u32DebugFlags &= ~_DEBUG_TIME_WARNING_ENABLE;
-    DebugPrintf(G_au8UtilMessageOFF);
+    DebugPrintf(G_au8MessageOFF);
   }
   else
   {
     G_u32DebugFlags |= _DEBUG_TIME_WARNING_ENABLE;
-    DebugPrintf(G_au8UtilMessageON);
+    DebugPrintf(G_au8MessageON);
   }
   
 } /* end DebugCommandSysTimeToggle() */
 
-
 #ifdef MPGL2 /* MPGL2 only tests */
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn static void DebugCommandCaptouchValuesToggle(void)
 
-@brief Toggles printing the current Captouch horizontal and vertical values.
 
-Requires:
-- NONE
+/*----------------------------------------------------------------------------------------------------------------------
+Function: DebugCommandCaptouchValuesToggle
 
-Promises:
-@param G_u32DebugFlags flag _DEBUG_CAPTOUCH_VALUES_ENABLE is toggled
-
+Description:
+Toggles printing the current Captouch horizontal and vertical values.
 */
 static void DebugCommandCaptouchValuesToggle(void)
 {
   u8 au8CaptouchDisplayMessage[] = "\n\rDisplay Captouch values ";
-  u8 au8CaptouchOnMessage[] = "No values displayed if Captouch is OFF\n\r";
   
   /* Print message and toggle the flag */
   DebugPrintf(au8CaptouchDisplayMessage);
   if(G_u32DebugFlags & _DEBUG_CAPTOUCH_VALUES_ENABLE)
   {
     G_u32DebugFlags &= ~_DEBUG_CAPTOUCH_VALUES_ENABLE;
-    DebugPrintf(G_au8UtilMessageOFF);
+    DebugPrintf(G_au8MessageOFF);
   }
   else
   {
     G_u32DebugFlags |= _DEBUG_CAPTOUCH_VALUES_ENABLE;
-    DebugPrintf(G_au8UtilMessageON);
-    DebugPrintf(au8CaptouchOnMessage);
+    DebugPrintf(G_au8MessageON);
   }
   
 } /* end DebugCommandCaptouchValuesToggle() */
@@ -1059,22 +693,14 @@ until the user sends a CR indicating they think they've entered a valid command.
 checked and reacted to accordingly.
 ***********************************************************************************************************************/
 
-/*!--------------------------------------------------------------------------------------------------------------------
-@fn void DebugSM_Idle(void)               
+/*----------------------------------------------------------------------------------------------------------------------
+Waits for a byte to appear in the Rx buffer.  The BufferParser is always moved
+through all new characters placing them into the command buffer until it hits a CR or there are no new
+characters to read. If there is no CR in this iteration, nothing else occurs.
 
-@brief Waits for a byte to appear in the Rx buffer.  
-
-The BufferParser is always moved through all new characters placing them into 
-the command buffer until it hits a CR or there are no new characters to read. 
-If there is no CR in this iteration, nothing else occurs.
-
-Backspace: Echo the backspace and a space character to clear the character on 
-screen; move Debug_pu8BufferCurrentChar back.
-
+Backspace: Echo the backspace and a space character to clear the character on screen; move Debug_pu8BufferCurrentChar back.
 CR: Advance states to process the command.
-
 Any other character: Echo it to the UART Tx and place a copy in Debug_au8CommandBuffer.
-
 */
 void DebugSM_Idle(void)               
 {
@@ -1088,39 +714,25 @@ void DebugSM_Idle(void)
   {
     /* Grab a copy of the current byte and echo it back */
     u8CurrentByte = *Debug_pu8RxBufferParser;
-        
+    
+    /* If the LED test is active, toggle LEDs based on characters */
+    if(Debug_bLedTestActive == TRUE)
+    {
+      DebugLedTestCharacter(u8CurrentByte);
+    }
+    
     /* Process the character */
     switch (u8CurrentByte)
     {
       /* Backspace: update command buffer pointer and send sequence to delete the char on the terminal */
       case(ASCII_BACKSPACE): 
       {
-        /* Process for scanf as long as we are not in Passthrough mode */
-        if( G_u32DebugFlags & _DEBUG_PASSTHROUGH )
-        {        
-          if(G_u8DebugScanfCharCount < DEBUG_SCANF_BUFFER_SIZE)
-          {
-            G_au8DebugScanfBuffer[G_u8DebugScanfCharCount] = u8CurrentByte;
-            G_u8DebugScanfCharCount++;
-          }
-        }
-        else
+        if(Debug_pu8CmdBufferNextChar != &Debug_au8CommandBuffer[0])
         {
-          if(G_u8DebugScanfCharCount != 0)
-          {
-            G_u8DebugScanfCharCount--;
-            G_au8DebugScanfBuffer[G_u8DebugScanfCharCount] = '\0';
-          }
-
-          /* Process for command */
-          if(Debug_pu8CmdBufferNextChar != &Debug_au8CommandBuffer[0])
-          {
-            Debug_pu8CmdBufferNextChar--;
-            Debug_u16CommandSize--;
-          }
+          Debug_pu8CmdBufferNextChar--;
+          Debug_u16CommandSize--;
         }
-                
-        /* Send the Backspace sequence to clear the character on the terminal */
+        
         DebugPrintf(au8BackspaceSequence);
         break;
       }
@@ -1128,11 +740,9 @@ void DebugSM_Idle(void)
       /* Carriage return: change states to process new command and fall through to echo character */
       case(ASCII_CARRIAGE_RETURN): 
       {
-        if( !( G_u32DebugFlags & _DEBUG_PASSTHROUGH) )
-        {
-          bCommandFound = TRUE;
-          Debug_pfnStateMachine = DebugSM_CheckCmd;
-        }
+        bCommandFound = TRUE;
+        
+        Debug_pfnStateMachine = DebugSM_CheckCmd;
         
         /* Fall through to default */        
       }
@@ -1140,45 +750,27 @@ void DebugSM_Idle(void)
       /* Add to command buffer and echo */
       default: 
       {
-        /* Process for scanf */
-        if(G_u8DebugScanfCharCount < DEBUG_SCANF_BUFFER_SIZE)
-        {
-          G_au8DebugScanfBuffer[G_u8DebugScanfCharCount] = u8CurrentByte;
-          G_u8DebugScanfCharCount++;
-        }
-        
-        /* Echo the character back to the terminal */
+        /* Echo the character and place it in the command buffer */
         UartWriteByte(Debug_Uart, u8CurrentByte);
-        
-        /* As long as Passthrough mode is not active, then update the command buffer */
-        if( !( G_u32DebugFlags & _DEBUG_PASSTHROUGH) )
+        *Debug_pu8CmdBufferNextChar = u8CurrentByte;
+        Debug_pu8CmdBufferNextChar++;
+        Debug_u16CommandSize++;
+
+        /* If the command buffer is now full but the last character was not ASCII_CARRIAGE_RETURN, throw out the whole
+        buffer and report an error message */
+        if( (Debug_pu8CmdBufferNextChar >= &Debug_au8CommandBuffer[DEBUG_CMD_BUFFER_SIZE]) &&
+            (u8CurrentByte != ASCII_CARRIAGE_RETURN) )
         {
-          *Debug_pu8CmdBufferNextChar = u8CurrentByte;
-          Debug_pu8CmdBufferNextChar++;
-          Debug_u16CommandSize++;
+          Debug_pu8CmdBufferNextChar = &Debug_au8CommandBuffer[0];
+          Debug_u16CommandSize = 0;
 
-          /* If the command buffer is now full but the last character was not ASCII_CARRIAGE_RETURN, throw out the whole
-          buffer and report an error message */
-          if( (Debug_pu8CmdBufferNextChar >= &Debug_au8CommandBuffer[DEBUG_CMD_BUFFER_SIZE]) &&
-              (u8CurrentByte != ASCII_CARRIAGE_RETURN) )
-          {
-            Debug_pu8CmdBufferNextChar = &Debug_au8CommandBuffer[0];
-            Debug_u16CommandSize = 0;
-
-            Debug_u32CurrentMessageToken = DebugPrintf(au8CommandOverflow);
-          }
+          Debug_u32CurrentMessageToken = DebugPrintf(au8CommandOverflow);
         }
         break;
       }
 
     } /* end switch (u8RxChar) */
-
-    /* If the LED test is active, toggle LEDs based on characters */
-    if(G_u32DebugFlags & _DEBUG_LED_TEST_ENABLE)
-    {
-      DebugLedTestCharacter(u8CurrentByte);
-    }
-    
+      
     /* In all cases, advance the RxBufferParser pointer safely */
     Debug_pu8RxBufferParser++;
     if(Debug_pu8RxBufferParser >= &Debug_au8RxBuffer[DEBUG_RX_BUFFER_SIZE])
@@ -1197,15 +789,12 @@ void DebugSM_Idle(void)
 } /* end DebugSM_Idle() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugSM_CheckCmd(void)        
-
-@brief Checks to see if a string entered is a valid command.
-
+/*----------------------------------------------------------------------------------------------------------------------
 At the start of this state, the command buffer has a candidate command terminated in CR.
-There is a strict rule that commands are of the form en+cxx where xx is any number
-from 0 to DEBUG_COMMANDS, so parsing can be done based on that rule.  All other 
-strings are invalid.  
+There is a strict rule that commands are of the form
+en+cxx where xx is any number from 0 to DEBUG_COMMANDS, so parsing can be done based
+on that rule.  All other strings are invalid.  Debug interrupts remain off
+until the command is processed.
 */
 void DebugSM_CheckCmd(void)        
 {
@@ -1273,10 +862,8 @@ void DebugSM_CheckCmd(void)
 } /* end DebugSM_CheckCmd() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugSM_ProcessCmd(void)         
-
-@brief Carry out the debug instruction. 
+/*----------------------------------------------------------------------------------------------------------------------
+Carry out the debug instruction. 
 */
 void DebugSM_ProcessCmd(void)         
 {
@@ -1289,13 +876,10 @@ void DebugSM_ProcessCmd(void)
 } /* end DebugSM_ProcessCmd() */
 
 
-/*!----------------------------------------------------------------------------------------------------------------------
-@fn void DebugSM_Error(void)         
-
-@brief The Error state for the task.
-
-Attempt to print an error message.  However if the Debug UART has failed, then 
-it obviously cannot print a message to tell you that.
+/*----------------------------------------------------------------------------------------------------------------------
+Error state 
+Attempt to print an error message (even though if the Debug UART has failed, then it obviously cannot print
+a message to tell you that!)
 */
 void DebugSM_Error(void)         
 {

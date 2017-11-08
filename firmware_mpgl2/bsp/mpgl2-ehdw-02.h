@@ -1,12 +1,12 @@
 /***********************************************************************************************************************
-* File: mpgl1-ehdw-03.h                                                                
+* File: mpgl2-ehdw-02.h                                                                
 * 
 * Description:
-* This file provides header information for the mpgl1-ehdw-03 board.
+* This file provides header information for the mpgl2-ehdw-02 board.
 ***********************************************************************************************************************/
 
-#ifndef _MPGL1
-#define _MPGL1
+#ifndef _MPGL2
+#define _MPGL2
 
 /***********************************************************************************************************************
 Type Definitions
@@ -40,11 +40,10 @@ Should be 6000 for 48MHz CCLK. */
 /***********************************************************************************************************************
 * Macros
 ***********************************************************************************************************************/
-#define WATCHDOG_BONE()  (AT91C_BASE_WDTC->WDTC_WDCR = WDT_CR_FEED) /* resets the watch dog countdown timer.*/
+#define WATCHDOG_BONE()  (AT91C_BASE_WDTC->WDTC_WDCR = WDT_CR_FEED)    /* resets the watch dog countdown timer.*/
 #define HEARTBEAT_ON()   (AT91C_BASE_PIOA->PIO_CODR = PA_31_HEARTBEAT) /* Turns on Heartbeat LED */
 #define HEARTBEAT_OFF()  (AT91C_BASE_PIOA->PIO_SODR = PA_31_HEARTBEAT) /* Turns off Heartbeat LED */
 
-#define SD_DETECT()      (AT91C_BASE_PIOA->PIO_PDSR & PA_02_SD_DETECT) /* SD detect switch asserted */
 
 /***********************************************************************************************************************
 * Function Declarations
@@ -92,7 +91,7 @@ $$$$$ PWM setup values
     29 [1] AT91C_ID_UDPHS  USB Device High Speed clock enabled
     28 [0] AT91C_ID_HDMA   HDMA
 
-    27 [0] AT91C_ID_ADC    10-bit ADC Controller (ADC) not enabled
+    27 [0] AT91C_ID_ADC    10-bit ADC Controller (ADC)
     26 [1] AT91C_ID_ADC12B 12-bit ADC Controller (ADC12B) clock enabled
     25 [1] AT91C_ID_PWMC   Pulse Width Modulation Controller clock enabled
     24 [1] AT91C_ID_TC2    Timer Counter 2 clock enabled
@@ -104,33 +103,32 @@ $$$$$ PWM setup values
 
     19 [1] AT91C_ID_TWI1   TWI 1 clock enabled
     18 [1] AT91C_ID_TWI0   TWI 0 clock enabled
-    17 [0] AT91C_ID_MCI0   Multimedia Card Interface not enabled
-    16 [0] AT91C_ID_US3    USART 3 not enabled
+    17 [0] AT91C_ID_MCI0   Multimedia Card Interface
+    16 [0] AT91C_ID_US3    USART 3
 
     15 [1] AT91C_ID_US2    USART 2 clock enabled
     14 [1] AT91C_ID_US1    USART 1 clock enabled
     13 [1] AT91C_ID_US0    USART 0 clock enabled
-    12 [0] AT91C_ID_PIOC   Parallel IO Controller C  not enabled
+    12 [0] AT91C_ID_PIOC   Parallel IO Controller C 
 
     11 [1] AT91C_ID_PIOB   Parallel IO Controller B clock enabled
     10 [1] AT91C_ID_PIOA   Parallel IO Controller A clock enabled
-    09 [0] AT91C_ID_HSMC4  HSMC4 not enabled
+    09 [0] AT91C_ID_HSMC4  HSMC4
     08 [1] AT91C_ID_DBGU   DBGU (standalone UART) clock enabled
 
-    07 [0] AT91C_ID_EFC1   EFC1 not enabled
+    07 [0] AT91C_ID_EFC1   EFC1
     06 [1] AT91C_ID_EFC0   EFC0 clock enabled
     05 [1] AT91C_ID_PMC    PMC clock enabled
     04 [1] AT91C_ID_WDG    WATCHDOG TIMER clock enabled
 
-    03 [0] AT91C_ID_RTT    REAL TIME TIMER not enabled
-    02 [0] AT91C_ID_RTC    REAL TIME CLOCK not enabled
+    03 [0] AT91C_ID_RTT    REAL TIME TIMER
+    02 [0] AT91C_ID_RTC    REAL TIME CLOCK
     01 [1] AT91C_ID_RSTC   RESET CONTROLLER clock enabled
     00 [1] AT91C_ID_SUPC   SUPPLY CONTROLLER clock enabled
 */
 
-
 #define MOR_KEY      (u32)(0x37 << 16)
-#define PMC_MOR_INIT (u32)0x0037F019
+#define PMC_MOR_INIT (u32)(0x0037F009)
 /*
     31 [0] Reserved
     30 [0] "
@@ -163,9 +161,9 @@ $$$$$ PWM setup values
     08 [0] "
 
     07 [0] Reserved
-    06 [0] MOSCRCF 8MHz
+    06 [0] MOSCRCF 4MHz
     05 [0] "
-    04 [1] "
+    04 [0] "
 
     03 [1] MOSCRCEN main on-chip RC osc is on for now
     02 [0] WAITMODE disabled
@@ -377,21 +375,21 @@ counter must be set at 1280. */
 /***********************************************************************************************************************
 !!!!! GPIO pin names
 ***********************************************************************************************************************/
-/* Hardware Definition for PCB MPGL1-EHDW-03 */
+/* Hardware Definition for PCB MPGL1-EHDW-01 */
 
 /* Port A bit positions */
 #define PA_31_HEARTBEAT          (u32)0x80000000
-#define PA_30_AN_DEMO            (u32)0x40000000
-#define PA_29_BUZZER2            (u32)0x20000000
-#define PA_28_BUZZER1            (u32)0x10000000
+#define PA_30_TP44               (u32)0x40000000
+#define PA_29_LED0_GRN           (u32)0x20000000
+#define PA_28_BUZZER             (u32)0x10000000
 #define PA_27_CLOCK_OUT          (u32)0x08000000
-#define PA_26_ANT_PWR_EN         (u32)0x04000000 
+#define PA_26_LED2_GRN           (u32)0x04000000 
 #define PA_25_ANT_USPI2_SCK      (u32)0x02000000
-#define PA_24_SD_USPI1_SCK       (u32)0x01000000
+#define PA_24_LCD_USPI1_SCK      (u32)0x01000000
 #define PA_23_ANT_USPI2_MOSI     (u32)0x00800000
 #define PA_22_ANT_USPI2_MISO     (u32)0x00400000 
-#define PA_21_SD_USPI1_MISO      (u32)0x00200000
-#define PA_20_SD_USPI1_MOSI      (u32)0x00100000
+#define PA_21_TP57               (u32)0x00200000
+#define PA_20_LCD_USPI1_MOSI     (u32)0x00100000
 #define PA_19_DEBUG_U0_PIMO      (u32)0x00080000
 #define PA_18_DEBUG_U0_POMI      (u32)0x00040000
 #define PA_17_BUTTON0            (u32)0x00020000
@@ -403,15 +401,15 @@ counter must be set at 1280. */
 #define PA_11_BLADE_UPIMO        (u32)0x00000800
 #define PA_10_I2C_SCL            (u32)0x00000400
 #define PA_09_I2C_SDA            (u32)0x00000200
-#define PA_08_SD_CS_MCDA3        (u32)0x00000100
-#define PA_07_HSMCI_MCDA2        (u32)0x00000080
-#define PA_06_HSMCI_MCDA1        (u32)0x00000040
-#define PA_05_HSMCI_MCDA0        (u32)0x00000020
-#define PA_04_HSMCI_MCCDA        (u32)0x00000010
-#define PA_03_HSMCI_MCCK         (u32)0x00000008
-#define PA_02_SD_DETECT          (u32)0x00000004
-#define PA_01_SD_WP              (u32)0x00000002 
-#define PA_00_TP54               (u32)0x00000001 
+#define PA_08_LED3_BLU           (u32)0x00000100
+#define PA_07_LED3_GRN           (u32)0x00000080
+#define PA_06_LED2_BLU           (u32)0x00000040
+#define PA_05_HSLIDE_CH2_Y       (u32)0x00000020
+#define PA_04_HSLIDE_CH2_X       (u32)0x00000010
+#define PA_03_HSLIDE_CH1_Y       (u32)0x00000008
+#define PA_02_HSLIDE_CH1_X       (u32)0x00000004
+#define PA_01_HSLIDE_CH0_Y       (u32)0x00000002 
+#define PA_00_HSLIDE_CH0_X       (u32)0x00000001 
 
 
 /* Port B bit positions */
@@ -426,26 +424,26 @@ counter must be set at 1280. */
 #define PB_23_ANT_MRDY          (u32)0x00800000
 #define PB_22_ANT_USPI2_CS      (u32)0x00400000
 #define PB_21_ANT_RESET         (u32)0x00200000
-#define PB_20_LED_RED           (u32)0x00100000
-#define PB_19_LED_GRN           (u32)0x00080000
-#define PB_18_LED_BLU           (u32)0x00040000
-#define PB_17_LED_YLW           (u32)0x00020000
-#define PB_16_LED_CYN           (u32)0x00010000
-#define PB_15_LED_ORG           (u32)0x00008000
-#define PB_14_LED_PRP           (u32)0x00004000
-#define PB_13_LED_WHT           (u32)0x00002000
-#define PB_12_LCD_BL_BLU        (u32)0x00001000
-#define PB_11_LCD_BL_GRN        (u32)0x00000800
-#define PB_10_LCD_BL_RED        (u32)0x00000400
-#define PB_09_LCD_RST           (u32)0x00000200
-#define PB_08_TP62              (u32)0x00000100 
-#define PB_07_TP60              (u32)0x00000080
-#define PB_06_TP58              (u32)0x00000040
-#define PB_05_TP56              (u32)0x00000020
+#define PB_20_LED0_RED          (u32)0x00100000
+#define PB_19_LED2_RED          (u32)0x00080000
+#define PB_18_LED3_RED          (u32)0x00040000
+#define PB_17_LED1_RED          (u32)0x00020000
+#define PB_16_LCD_RD            (u32)0x00010000
+#define PB_15_LCD_A0            (u32)0x00008000
+#define PB_14_LCD_RST           (u32)0x00004000
+#define PB_13_LED1_BLU          (u32)0x00002000
+#define PB_12_LCD_CS            (u32)0x00001000
+#define PB_11_VSLIDE_CH2_Y      (u32)0x00000800
+#define PB_10_VSLIDE_CH2_X      (u32)0x00000400
+#define PB_09_VSLIDE_CH1_Y      (u32)0x00000200
+#define PB_08_VSLIDE_CH1_X      (u32)0x00000100 
+#define PB_07_VSLIDE_CH0_Y      (u32)0x00000080
+#define PB_06_VSLIDE_CH0_X      (u32)0x00000040
+#define PB_05_LCD_BL            (u32)0x00000020
 #define PB_04_BLADE_AN1         (u32)0x00000010
 #define PB_03_BLADE_AN0         (u32)0x00000008
-#define PB_02_BUTTON3           (u32)0x00000004
-#define PB_01_BUTTON2           (u32)0x00000002
+#define PB_02_LED1_GRN          (u32)0x00000004
+#define PB_01_LED0_BLU          (u32)0x00000002
 #define PB_00_BUTTON1           (u32)0x00000001
 
 
@@ -457,22 +455,22 @@ counter must be set at 1280. */
 0: No effect
 1: Pin is controlled by PIO
 */
-#define PIOA_PER_INIT (u32)0x84030007
+#define PIOA_PER_INIT (u32)0xE42301FF
 /* 
     31 [1] PA_31_HEARTBEAT PIO control enabled
-    30 [0] PA_30_AN_DEMO PIO control not enabled
-    29 [0] PA_29_BUZZER2 PIO control not enabled
-    28 [0] PA_28_BUZZER1 PIO control not enabled
+    30 [1] PA_30_TP44 PIO control enabled
+    29 [1] PA_29_LED0_GRN PIO control enabled
+    28 [0] PA_28_BUZZER PIO control not enabled
 
     27 [0] PA_27_CLOCK_OUT PIO control not enabled
-    26 [1] PA_26_ANT_PWR_EN PIO control enabled
+    26 [1] PA_26_LED2_GRN PIO control enabled
     25 [0] PA_25_ANT_USPI2_SCK PIO control not enabled
-    24 [0] PA_24_SD_USPI1_SCK PIO control not enabled
+    24 [0] PA_24_LCD_USPI1_SCK PIO control not enabled
 
     23 [0] PA_23_ANT_USPI2_MOSI PIO control not enabled
     22 [0] PA_22_ANT_USPI2_MISO PIO control not enabled
-    21 [0] PA_21_SD_USPI1_MISO PIO control not enabled
-    20 [0] PA_20_SD_USPI1_MOSI PIO control not enabled
+    21 [1] PA_21_TP57 PIO control enabled
+    20 [0] PA_20_LCD_USPI1_MOSI PIO control not enabled
 
     19 [0] PA_19_DEBUG_U0_PIMO PIO control not enabled
     18 [0] PA_18_DEBUG_U0_POMI PIO control not enabled
@@ -487,17 +485,17 @@ counter must be set at 1280. */
     11 [0] PA_11_BLADE_UPIMO PIO control not enabled
     10 [0] PA_10_I2C_SCL PIO control not enabled
     09 [0] PA_09_I2C_SDA PIO control not enabled
-    08 [0] PA_08_SD_CS_MCDA3 PIO control not enabled
+    08 [1] PA_08_LED3_BLU PIO control enabled
 
-    07 [0] PA_07_HSMCI_MCDA2 PIO control not enabled
-    06 [0] PA_06_HSMCI_MCDA1 PIO control not enabled
-    05 [0] PA_05_HSMCI_MCDA0 PIO control not enabled
-    04 [0] PA_04_HSMCI_MCCDA PIO control not enabled
+    07 [1] PA_07_LED3_GRN PIO control enabled
+    06 [1] PA_06_LED2_BLU PIO control enabled
+    05 [1] PA_05_HSLIDE_CH2_Y PIO control enabled
+    04 [1] PA_04_HSLIDE_CH2_X PIO control enabled
 
-    03 [0] PA_03_HSMCI_MCCK PIO control not enabled
-    02 [1] PA_02_SD_DETECT PIO control enabled
-    01 [1] PA_01_SD_WP PIO control enabled
-    00 [1] PA_00_TP54 PIO control enabled
+    03 [1] PA_03_HSLIDE_CH1_Y PIO control enabled
+    02 [1] PA_02_HSLIDE_CH1_X PIO control enabled
+    01 [1] PA_01_HSLIDE_CH0_Y PIO control enabled
+    00 [1] PA_00_HSLIDE_CH0_X PIO control enabled
 */
 
 #define PIOB_PER_INIT (u32)0x01BFFFE7
@@ -515,31 +513,31 @@ counter must be set at 1280. */
     23 [1] PB_23_ANT_MRDY PIO control enabled
     22 [0] PB_22_ANT_USPI2_CS PIO control not enabled
     21 [1] PB_21_ANT_RESET PIO control enabled
-    20 [1] PB_20_LED_RED PIO control enabled
+    20 [1] PB_20_LED0_RED PIO control enabled
 
-    19 [1] PB_19_LED_GRN PIO control enabled
-    18 [1] PB_18_LED_BLU PIO control enabled
-    17 [1] PB_17_LED_YLW PIO control enabled
-    16 [1] PB_16_LED_CYN PIO control enabled
+    19 [1] PB_19_LED2_RED PIO control enabled
+    18 [1] PB_18_LED3_RED PIO control enabled
+    17 [1] PB_17_LED1_RED PIO control enabled
+    16 [1] PB_16_LCD_RD PIO control enabled
 
-    15 [1] PB_15_LED_ORG PIO control enabled
-    14 [1] PB_14_LED_PRP PIO control enabled
-    13 [1] PB_13_LED_WHT PIO control enabled
-    12 [1] PB_12_LCD_BL_BLU PIO control enabled
+    15 [1] PB_15_LCD_A0 PIO control enabled
+    14 [1] PB_14_LCD_RST PIO control enabled
+    13 [1] PB_13_LED1_BLU PIO control enabled
+    12 [1] PB_12_LCD_CS PIO control enabled
 
-    11 [1] PB_11_LCD_BL_GRN PIO control enabled
-    10 [1] PB_10_LCD_BL_RED PIO control enabled
-    09 [1] PB_09_LCD_RST PIO control enabled
-    08 [1] PB_08_TP62 PIO control enabled
+    11 [1] PB_11_VSLIDE_CH2_Y PIO control enabled
+    10 [1] PB_10_VSLIDE_CH2_X PIO control enabled
+    09 [1] PB_09_VSLIDE_CH1_Y PIO control enabled
+    08 [1] PB_08_VSLIDE_CH1_X PIO control enabled
 
-    07 [1] PB_07_TP60 PIO control enabled
-    06 [1] PB_06_TP58 PIO control enabled
-    05 [1] PB_05_TP56 PIO control enabled
+    07 [1] PB_07_VSLIDE_CH0_Y PIO control enabled
+    06 [1] PB_06_VSLIDE_CH0_X PIO control enabled
+    05 [1] PB_05_LCD_BL PIO control enabled
     04 [0] PB_04_BLADE_AN1 PIO control not enabled
 
     03 [0] PB_03_BLADE_AN0 PIO control not enabled
-    02 [1] PB_02_BUTTON3 PIO control enabled
-    01 [1] PB_01_BUTTON2 PIO control enabled
+    02 [1] PB_02_LED1_GRN PIO control enabled
+    01 [1] PB_01_LED0_BLU PIO control enabled
     00 [1] PB_00_BUTTON1 PIO control enabled
 */
 
@@ -548,22 +546,22 @@ counter must be set at 1280. */
 0: No effect
 1: Pin is controlled by corresponding peripheral
 */
-#define PIOA_PDR_INIT (u32)0x7BFCFFF8
+#define PIOA_PDR_INIT (u32)0x1BDCFE00
 /* 
     31 [0] PA_31_HEARTBEAT not controlled by peripheral
-    30 [1] PA_30_AN_DEMO controlled by peripheral
-    29 [1] PA_29_BUZZER2 controlled by peripheral
-    28 [1] PA_28_BUZZER1 controlled by peripheral
+    30 [0] PA_30_TP44 not controlled by peripheral
+    29 [0] PA_29_LED0_GRN not controlled by peripheral
+    28 [1] PA_28_BUZZER controlled by peripheral
 
     27 [1] PA_27_CLOCK_OUT controlled by peripheral
-    26 [0] PA_26_ANT_PWR_EN not controlled by peripheral
+    26 [0] PA_26_LED2_GRN not controlled by peripheral
     25 [1] PA_25_ANT_USPI2_SCK controlled by peripheral
-    24 [1] PA_24_SD_USPI1_SCK controlled by peripheral
+    24 [1] PA_24_LCD_USPI1_SCK controlled by peripheral
 
     23 [1] PA_23_ANT_USPI2_MOSI controlled by peripheral
     22 [1] PA_22_ANT_USPI2_MISO controlled by peripheral
-    21 [1] PA_21_SD_USPI1_MISO controlled by peripheral
-    20 [1] PA_20_SD_USPI1_MOSI controlled by peripheral
+    21 [0] PA_21_TP57 not controlled by peripheral
+    20 [1] PA_20_LCD_USPI1_MOSI controlled by peripheral
 
     19 [1] PA_19_DEBUG_U0_PIMO controlled by peripheral
     18 [1] PA_18_DEBUG_U0_POMI controlled by peripheral
@@ -578,17 +576,17 @@ counter must be set at 1280. */
     11 [1] PA_11_BLADE_UPIMO controlled by peripheral
     10 [1] PA_10_I2C_SCL controlled by peripheral
     09 [1] PA_09_I2C_SDA controlled by peripheral
-    08 [1] PA_08_SD_CS_MCDA3 controlled by peripheral
+    08 [0] PA_08_LED3_BLU not controlled by peripheral
 
-    07 [1] PA_07_HSMCI_MCDA2 controlled by peripheral
-    06 [1] PA_06_HSMCI_MCDA1 controlled by peripheral
-    05 [1] PA_05_HSMCI_MCDA0 controlled by peripheral
-    04 [1] PA_04_HSMCI_MCCDA controlled by peripheral
+    07 [0] PA_07_LED3_GRN not controlled by peripheral
+    06 [0] PA_06_LED2_BLU not controlled by peripheral
+    05 [0] *PA_05_HSLIDE_CH2_Y not controlled by peripheral
+    04 [0] *PA_04_HSLIDE_CH2_X not controlled by peripheral
 
-    03 [1] PA_03_HSMCI_MCCK controlled by peripheral
-    02 [0] PA_02_SD_DETECT not controlled by peripheral
-    01 [0] PA_01_SD_WP not controlled by peripheral
-    00 [0] PA_00_TP54 not controlled by peripheral
+    03 [0] *PA_03_HSLIDE_CH1_Y not controlled by peripheral
+    02 [0] *PA_02_HSLIDE_CH1_X not controlled by peripheral
+    01 [0] *PA_01_HSLIDE_CH0_Y not controlled by peripheral
+    00 [0] *PA_00_HSLIDE_CH0_X not controlled by peripheral
 */
 
 #define PIOB_PDR_INIT (u32)0x00400018
@@ -606,31 +604,31 @@ counter must be set at 1280. */
     23 [0] PB_23_ANT_MRDY not controlled by peripheral
     22 [1] PB_22_ANT_USPI2_CS controlled by peripheral
     21 [0] PB_21_ANT_RESET not controlled by peripheral
-    20 [0] PB_20_LED_RED not controlled by peripheral
+    20 [0] PB_20_LED0_RED not controlled by peripheral
 
-    19 [0] PB_19_LED_GRN not controlled by peripheral
-    18 [0] PB_18_LED_BLU not controlled by peripheral
-    17 [0] PB_17_LED_YLW not controlled by peripheral
-    16 [0] PB_16_LED_CYN not controlled by peripheral
+    19 [0] PB_19_LED2_RED not controlled by peripheral
+    18 [0] PB_18_LED3_RED not controlled by peripheral
+    17 [0] PB_17_LED1_RED not controlled by peripheral
+    16 [0] PB_16_LCD_RD not controlled by peripheral
 
-    15 [0] PB_15_LED_ORG not controlled by peripheral
-    14 [0] PB_14_LED_PRP not controlled by peripheral
-    13 [0] PB_13_LED_WHT not controlled by peripheral
-    12 [0] PB_12_LCD_BL_BLU not controlled by peripheral
+    15 [0] PB_15_LCD_A0 not controlled by peripheral
+    14 [0] PB_14_LCD_RST not controlled by peripheral
+    13 [0] PB_13_LED1_BLU not controlled by peripheral
+    12 [0] PB_12_LCD_CS not controlled by peripheral
 
-    11 [0] PB_11_LCD_BL_GRN not controlled by peripheral
-    10 [0] PB_10_LCD_BL_RED not controlled by peripheral
-    09 [0] PB_09_LCD_RST not controlled by peripheral
-    08 [0] PB_08_TP62 not controlled by peripheral
+    11 [0] PB_11_VSLIDE_CH2_Y not controlled by peripheral
+    10 [0] PB_10_VSLIDE_CH2_X not controlled by peripheral
+    09 [0] PB_09_VSLIDE_CH1_Y not controlled by peripheral
+    08 [0] PB_08_VSLIDE_CH1_X not controlled by peripheral
 
-    07 [0] PB_07_TP60 not controlled by peripheral
-    06 [0] PB_06_TP58 not controlled by peripheral
-    05 [0] PB_05_TP56 not controlled by peripheral
+    07 [0] PB_07_VSLIDE_CH0_Y not controlled by peripheral
+    06 [0] PB_06_VSLIDE_CH0_X not controlled by peripheral
+    05 [0] PB_05_LCD_BL not controlled by peripheral
     04 [1] PB_04_BLADE_AN1 controlled by peripheral
 
     03 [1] PB_03_BLADE_AN0 controlled by peripheral
-    02 [0] PB_02_BUTTON3 not controlled by peripheral
-    01 [0] PB_01_BUTTON2 not controlled by peripheral
+    02 [0] PB_02_LED1_GRN not controlled by peripheral
+    01 [0] PB_01_LED0_BLU not controlled by peripheral
     00 [0] PB_00_BUTTON1 not controlled by peripheral
 */
 
@@ -639,22 +637,22 @@ Configures the pin as an output or input.
 0: No effect
 1: Enables the output on the I/O line
 */
-#define PIOA_OER_INIT (u32)0xBF55D7F9
+#define PIOA_OER_INIT (u32)0xBF55D7D5
 /* 
     31 [1] PA_31_HEARTBEAT output enabled
-    30 [0] PA_30_AN_DEMO input
-    29 [1] PA_29_BUZZER2 output enabled
-    28 [1] PA_28_BUZZER1 output enabled
+    30 [0] PA_30_TP44 input
+    29 [1] PA_29_LED0_GRN output enabled
+    28 [1] PA_28_BUZZER output enabled
 
     27 [1] PA_27_CLOCK_OUT output enabled
-    26 [1] PA_26_ANT_PWR_EN output enabled
+    26 [1] PA_26_LED2_GRN output enabled
     25 [1] PA_25_ANT_USPI2_SCK output enabled
-    24 [1] PA_24_SD_USPI1_SCK output enabled
+    24 [1] PA_24_LCD_USPI1_SCK output enabled
 
     23 [0] PA_23_ANT_USPI2_MOSI input
     22 [1] PA_22_ANT_USPI2_MISO output enabled
-    21 [0] PA_21_SD_USPI1_MISO input input
-    20 [1] PA_20_SD_USPI1_MOSI output enabled
+    21 [0] PA_21_TP57 input
+    20 [1] PA_20_LCD_USPI1_MOSI output enabled
 
     19 [0] PA_19_DEBUG_U0_PIMO input
     18 [1] PA_18_DEBUG_U0_POMI output enabled
@@ -669,20 +667,20 @@ Configures the pin as an output or input.
     11 [0] PA_11_BLADE_UPIMO  input
     10 [1] PA_10_I2C_SCL output enabled
     09 [1] PA_09_I2C_SDA output enabled
-    08 [1] PA_08_SD_CS_MCDA3 output enabled
+    08 [1] PA_08_LED3_BLU output enabled
 
-    07 [1] PA_07_HSMCI_MCDA2 output enabled
-    06 [1] PA_06_HSMCI_MCDA1 output enabled
-    05 [1] PA_05_HSMCI_MCDA0 output enabled
-    04 [1] PA_04_HSMCI_MCCDA output enabled
+    07 [1] PA_07_LED3_GRN output enabled
+    06 [1] PA_06_LED2_BLU output enabled
+    05 [0] PA_05_HSLIDE_CH2_Y input
+    04 [1] PA_04_HSLIDE_CH2_X output enabled
 
-    03 [1] PA_03_HSMCI_MCCK output enabled
-    02 [0] PA_02_SD_DETECT input
-    01 [0] PA_01_SD_WP input
-    00 [1] PA_00_TP54 output enabled
+    03 [0] PA_03_HSLIDE_CH1_Y input
+    02 [1] PA_02_HSLIDE_CH1_X output enabled
+    01 [0] PA_01_HSLIDE_CH0_Y input
+    00 [1] PA_00_HSLIDE_CH0_X output enabled
 */
 
-#define PIOB_OER_INIT (u32)0x01BFFFE0
+#define PIOB_OER_INIT (u32)0x019FF566
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -695,33 +693,33 @@ Configures the pin as an output or input.
     24 [1] PB_24_ANT_SRDY output enabled
 
     23 [1] PB_23_ANT_MRDY output enabled
-    22 [0] PB_22_ANT_USPI2_CS
-    21 [1] PB_21_ANT_RESET output enabled
-    20 [1] PB_20_LED_RED output enabled
+    22 [0] PB_22_ANT_USPI2_CS input
+    21 [0] PB_21_ANT_RESET output NOT enabled yet
+    20 [1] PB_20_LED0_RED output enabled
 
-    19 [1] PB_19_LED_GRN output enabled
-    18 [1] PB_18_LED_BLU output enabled
-    17 [1] PB_17_LED_YLW output enabled
-    16 [1] PB_16_LED_CYN output enabled
+    19 [1] PB_19_LED2_RED output enabled
+    18 [1] PB_18_LED3_RED output enabled
+    17 [1] PB_17_LED1_RED output enabled
+    16 [1] PB_16_LCD_RD output enabled
 
-    15 [1] PB_15_LED_ORG output enabled
-    14 [1] PB_14_LED_PRP output enabled
-    13 [1] PB_13_LED_WHT output enabled
-    12 [1] PB_12_LCD_BL_BLU output enabled
+    15 [1] PB_15_LCD_A0 output enabled
+    14 [1] PB_14_LCD_RST output enabled
+    13 [1] PB_13_LED1_BLU output enabled
+    12 [1] PB_12_LCD_CS output enabled
 
-    11 [1] PB_11_LCD_BL_GRN output enabled
-    10 [1] PB_10_LCD_BL_RED output enabled
-    09 [1] PB_09_LCD_RST output enabled
-    08 [1] PB_08_TP62 output enabled
+    11 [0] PB_11_VSLIDE_CH2_Y input
+    10 [1] PB_10_VSLIDE_CH2_X output enabled
+    09 [0] PB_09_VSLIDE_CH1_Y input
+    08 [1] PB_08_VSLIDE_CH1_X output enabled
 
-    07 [1] PB_07_TP60 output enabled
-    06 [1] PB_06_TP58 output enabled
-    05 [1] PB_05_TP56 output enabled
+    07 [0] PB_07_VSLIDE_CH0_Y input
+    06 [1] PB_06_VSLIDE_CH0_X output enabled
+    05 [1] PB_05_LCD_BL output enabled
     04 [0] PB_04_BLADE_AN1 input
 
     03 [0] PB_03_BLADE_AN0 input
-    02 [0] PB_02_BUTTON3 input
-    01 [0] PB_01_BUTTON2 input
+    02 [1] PB_02_LED1_GRN output enabled
+    01 [1] PB_01_LED0_BLU output enabled
     00 [0] PB_00_BUTTON1 input
 */
 
@@ -729,22 +727,22 @@ Configures the pin as an output or input.
 0: No effect
 1: Disables the output on the I/O line.
 */
-#define PIOA_ODR_INIT (u32)0x40AA2806
+#define PIOA_ODR_INIT (u32)0x40AA282A
 /* 
     31 [0] PA_31_HEARTBEAT output 
-    30 [1] PA_30_AN_DEMO input
-    29 [0] PA_29_BUZZER2 output 
-    28 [0] PA_28_BUZZER1 output 
+    30 [1] PA_30_TP44 input
+    29 [0] PA_29_LED0_GRN output 
+    28 [0] PA_28_BUZZER output 
 
     27 [0] PA_27_CLOCK_OUT output 
-    26 [0] PA_26_ANT_PWR_EN output 
+    26 [0] PA_26_LED2_GRN output 
     25 [0] PA_25_ANT_USPI2_SCK output 
-    24 [0] PA_24_SD_USPI1_SCK output 
+    24 [0] PA_24_LCD_USPI1_SCK output 
 
     23 [1] PA_23_ANT_USPI2_MOSI input
     22 [0] PA_22_ANT_USPI2_MISO output 
-    21 [1] PA_21_SD_USPI1_MISO input 
-    20 [0] PA_20_SD_USPI1_MOSI output 
+    21 [1] PA_21_TP57 input 
+    20 [0] PA_20_LCD_USPI1_MOSI output 
 
     19 [1] PA_19_DEBUG_U0_PIMO input
     18 [0] PA_18_DEBUG_U0_POMI output 
@@ -759,20 +757,20 @@ Configures the pin as an output or input.
     11 [1] PA_11_BLADE_UPIMO input
     10 [0] PA_10_I2C_SCL output 
     09 [0] PA_09_I2C_SDA output 
-    08 [0] PA_08_SD_CS_MCDA3 output 
+    08 [0] PA_08_LED3_BLU output 
 
-    07 [0] PA_07_HSMCI_MCDA2 output 
-    06 [0] PA_06_HSMCI_MCDA1 output 
-    05 [0] PA_05_HSMCI_MCDA0 output 
-    04 [0] PA_04_HSMCI_MCCDA output 
+    07 [0] PA_07_LED3_GRN output 
+    06 [0] PA_06_LED2_BLU output 
+    05 [1] PA_05_HSLIDE_CH2_Y input 
+    04 [0] PA_04_HSLIDE_CH2_X output 
 
-    03 [0] PA_03_HSMCI_MCCK output 
-    02 [1] PA_02_SD_DETECT input
-    01 [1] PA_01_SD_WP input
-    00 [0] PA_00_TP54 output 
+    03 [1] PA_03_HSLIDE_CH1_Y input 
+    02 [0] PA_02_HSLIDE_CH1_X output
+    01 [1] PA_01_HSLIDE_CH0_Y input
+    00 [0] PA_00_HSLIDE_CH0_X output 
 */
 
-#define PIOB_ODR_INIT (u32)0x0040001F
+#define PIOB_ODR_INIT (u32)0x00400A99
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -787,31 +785,31 @@ Configures the pin as an output or input.
     23 [0] PB_23_ANT_MRDY output
     22 [1] PB_22_ANT_USPI2_CS input
     21 [0] PB_21_ANT_RESET output 
-    20 [0] PB_20_LED_RED output 
+    20 [0] PB_20_LED0_RED output 
 
-    19 [0] PB_19_LED_GRN output 
-    18 [0] PB_18_LED_BLU output 
-    17 [0] PB_17_LED_YLW output 
-    16 [0] PB_16_LED_CYN output 
+    19 [0] PB_19_LED2_RED output 
+    18 [0] PB_18_LED3_RED output 
+    17 [0] PB_17_LED1_RED output 
+    16 [0] PB_16_LCD_RD output 
 
-    15 [0] PB_15_LED_ORG output 
-    14 [0] PB_14_LED_PRP output 
-    13 [0] PB_13_LED_WHT output 
-    12 [0] PB_12_LCD_BL_BLU output 
+    15 [0] PB_15_LCD_A0 output 
+    14 [0] PB_14_LCD_RST output 
+    13 [0] PB_13_LED1_BLU output 
+    12 [0] PB_12_LCD_CS output 
 
-    11 [0] PB_11_LCD_BL_GRN output 
-    10 [0] PB_10_LCD_BL_RED output 
-    09 [0] PB_09_LCD_RST output 
-    08 [0] PB_08_TP62 output 
+    11 [1] PB_11_VSLIDE_CH2_Y input 
+    10 [0] PB_10_VSLIDE_CH2_X output 
+    09 [1] PB_09_VSLIDE_CH1_Y input 
+    08 [0] PB_08_VSLIDE_CH1_X output 
 
-    07 [0] PB_07_TP60 output 
-    06 [0] PB_06_TP58 output 
-    05 [0] PB_05_TP56 output 
+    07 [1] PB_07_VSLIDE_CH0_Y input 
+    06 [0] PB_06_VSLIDE_CH0_X output 
+    05 [0] PB_05_LCD_BL output 
     04 [1] PB_04_BLADE_AN1 input
 
     03 [1] PB_03_BLADE_AN0 input
-    02 [1] PB_02_BUTTON3 input
-    01 [1] PB_01_BUTTON2 input
+    02 [0] PB_02_LED1_GRN output
+    01 [0] PB_01_LED0_BLU output
     00 [1] PB_00_BUTTON1 input
 */
 
@@ -822,19 +820,19 @@ Configures the pin as an output or input.
 #define PIOA_IFER_INIT (u32)0x00000000
 /* 
     31 [0] PA_31_HEARTBEAT no glitch filter
-    30 [0] PA_30_AN_DEMO no glitch filter
-    29 [0] PA_29_BUZZER2 no glitch filter
-    28 [0] PA_28_BUZZER1 no glitch filter
+    30 [0] PA_30_TP44 no glitch filter
+    29 [0] PA_29_LED0_GRN no glitch filter
+    28 [0] PA_28_BUZZER no glitch filter
 
     27 [0] PA_27_CLOCK_OUT no glitch filter
-    26 [0] PA_26_ANT_PWR_EN no glitch filter
+    26 [0] PA_26_LED2_GRN no glitch filter
     25 [0] PA_25_ANT_USPI2_SCK no glitch filter
-    24 [0] PA_24_SD_USPI1_SCK no glitch filter
+    24 [0] PA_24_LCD_USPI1_SCK no glitch filter
 
     23 [0] PA_23_ANT_USPI2_MOSI no glitch filter
     22 [0] PA_22_ANT_USPI2_MISO no glitch filter
-    21 [0] PA_21_SD_USPI1_MISO no glitch filter
-    20 [0] PA_20_SD_USPI1_MOSI no glitch filter
+    21 [0] PA_21_TP57 no glitch filter
+    20 [0] PA_20_LCD_USPI1_MOSI no glitch filter
 
     19 [0] PA_19_DEBUG_U0_PIMO no glitch filter
     18 [0] PA_18_DEBUG_U0_POMI no glitch filter
@@ -849,17 +847,17 @@ Configures the pin as an output or input.
     11 [0] PA_11_BLADE_UPIMO no glitch filter
     10 [0] PA_10_I2C_SCL no glitch filter
     09 [0] PA_09_I2C_SDA no glitch filter
-    08 [0] PA_08_SD_CS_MCDA3 no glitch filter
+    08 [0] PA_08_LED3_BLU no glitch filter
 
-    07 [0] PA_07_HSMCI_MCDA2 no glitch filter
-    06 [0] PA_06_HSMCI_MCDA1 no glitch filter
-    05 [0] PA_05_HSMCI_MCDA0 no glitch filter
-    04 [0] PA_04_HSMCI_MCCDA no glitch filter
+    07 [0] PA_07_LED3_GRN no glitch filter
+    06 [0] PA_06_LED2_BLU no glitch filter
+    05 [0] PA_05_HSLIDE_CH2_Y no glitch filter
+    04 [0] PA_04_HSLIDE_CH2_X no glitch filter
 
-    03 [0] PA_03_HSMCI_MCCK no glitch filter
-    02 [0] PA_02_SD_DETECT no glitch filter
-    01 [0] PA_01_SD_WP no glitch filter
-    00 [0] PA_00_TP54 no glitch filter
+    03 [0] PA_03_HSLIDE_CH1_Y no glitch filter
+    02 [0] PA_02_HSLIDE_CH1_X no glitch filter
+    01 [0] PA_01_HSLIDE_CH0_Y no glitch filter
+    00 [0] PA_00_HSLIDE_CH0_X no glitch filter
 */
 
 #define PIOB_IFER_INIT (u32)0x00000000
@@ -877,31 +875,31 @@ Configures the pin as an output or input.
     23 [0] PB_23_ANT_MRDY no glitch filter
     22 [0] PB_22_ANT_USPI2_CS no glitch filter
     21 [0] PB_21_ANT_RESET no glitch filter
-    20 [0] PB_20_LED_RED no glitch filter
+    20 [0] PB_20_LED0_RED no glitch filter
 
-    19 [0] PB_19_LED_GRN no glitch filter
-    18 [0] PB_18_LED_BLU no glitch filter
-    17 [0] PB_17_LED_YLW no glitch filter
-    16 [0] PB_16_LED_CYN no glitch filter
+    19 [0] PB_19_LED2_RED no glitch filter
+    18 [0] PB_18_LED3_RED no glitch filter
+    17 [0] PB_17_LED1_RED no glitch filter
+    16 [0] PB_16_LCD_RD no glitch filter
 
-    15 [0] PB_15_LED_ORG no glitch filter
-    14 [0] PB_14_LED_PRP no glitch filter
-    13 [0] PB_13_LED_WHT no glitch filter
-    12 [0] PB_12_LCD_BL_BLU no glitch filter
+    15 [0] PB_15_LCD_A0 no glitch filter
+    14 [0] PB_14_LCD_RST no glitch filter
+    13 [0] PB_13_LED1_BLU no glitch filter
+    12 [0] PB_12_LCD_CS no glitch filter
 
-    11 [0] PB_11_LCD_BL_GRN no glitch filter
-    10 [0] PB_10_LCD_BL_RED no glitch filter
-    09 [0] PB_09_LCD_RST no glitch filter
-    08 [0] PB_08_TP62 no glitch filter
+    11 [0] PB_11_VSLIDE_CH2_Y no glitch filter
+    10 [0] PB_10_VSLIDE_CH2_X no glitch filter
+    09 [0] PB_09_VSLIDE_CH1_Y no glitch filter
+    08 [0] PB_08_VSLIDE_CH1_X no glitch filter
 
-    07 [0] PB_07_TP60 no glitch filter
-    06 [0] PB_06_TP58 no glitch filter
-    05 [0] PB_05_TP56 no glitch filter
+    07 [0] PB_07_VSLIDE_CH0_Y no glitch filter
+    06 [0] PB_06_VSLIDE_CH0_X no glitch filter
+    05 [0] PB_05_LCD_BL no glitch filter
     04 [0] PB_04_BLADE_AN1 no glitch filter
 
     03 [0] PB_03_BLADE_AN0 no glitch filter
-    02 [0] PB_02_BUTTON3 no glitch filter
-    01 [0] PB_01_BUTTON2 no glitch filter
+    02 [0] PB_02_LED1_GRN no glitch filter
+    01 [0] PB_01_LED0_BLU no glitch filter
     00 [0] PB_00_BUTTON1 no glitch filter
 */
 
@@ -912,19 +910,19 @@ Configures the pin as an output or input.
 #define PIOA_IFDR_INIT (u32)0x00000000
 /* 
     31 [0] PA_31_HEARTBEAT no input filter
-    30 [0] PA_30_AN_DEMO no input filter
-    29 [0] PA_29_BUZZER2 no input filter
-    28 [0] PA_28_BUZZER1 no input filter
+    30 [0] PA_30_TP44 no input filter
+    29 [0] PA_29_LED0_GRN no input filter
+    28 [0] PA_28_BUZZER no input filter
 
     27 [0] PA_27_CLOCK_OUT no input filter
-    26 [0] PA_26_ANT_PWR_EN no input filter
+    26 [0] PA_26_LED2_GRN no input filter
     25 [0] PA_25_ANT_USPI2_SCK no input filter
-    24 [0] PA_24_SD_USPI1_SCK no input filter
+    24 [0] PA_24_LCD_USPI1_SCK no input filter
 
     23 [0] PA_23_ANT_USPI2_MOSI no input filter
     22 [0] PA_22_ANT_USPI2_MISO no input filter
-    21 [0] PA_21_SD_USPI1_MISO no input filter
-    20 [0] PA_20_SD_USPI1_MOSI no input filter
+    21 [0] PA_21_TP57 no input filter
+    20 [0] PA_20_LCD_USPI1_MOSI no input filter
 
     19 [0] PA_19_DEBUG_U0_PIMO no input filter
     18 [0] PA_18_DEBUG_U0_POMI no input filter
@@ -939,17 +937,17 @@ Configures the pin as an output or input.
     11 [0] PA_11_BLADE_UPIMO no input filter
     10 [0] PA_10_I2C_SCL no input filter
     09 [0] PA_09_I2C_SDA no input filter
-    08 [0] PA_08_SD_CS_MCDA3 no input filter
+    08 [0] PA_08_LED3_BLU no input filter
 
-    07 [0] PA_07_HSMCI_MCDA2 no input filter
-    06 [0] PA_06_HSMCI_MCDA1 no input filter
-    05 [0] PA_05_HSMCI_MCDA0 no input filter
-    04 [0] PA_04_HSMCI_MCCDA no input filter
+    07 [0] PA_07_LED3_GRN no input filter
+    06 [0] PA_06_LED2_BLU no input filter
+    05 [0] PA_05_HSLIDE_CH2_Y no input filter
+    04 [0] PA_04_HSLIDE_CH2_X no input filter
 
-    03 [0] PA_03_HSMCI_MCCK no input filter
-    02 [0] PA_02_SD_DETECT no input filter
-    01 [0] PA_01_SD_WP no input filter
-    00 [0] PA_00_TP54 no input filter
+    03 [0] PA_03_HSLIDE_CH1_Y no input filter
+    02 [0] PA_02_HSLIDE_CH1_X no input filter
+    01 [0] PA_01_HSLIDE_CH0_Y no input filter
+    00 [0] PA_00_HSLIDE_CH0_X no input filter
 */
 
 #define PIOB_IFDR_INIT (u32)0x00000000
@@ -967,31 +965,31 @@ Configures the pin as an output or input.
     23 [0] PB_23_ANT_MRDY no input filter
     22 [0] PB_22_ANT_USPI2_CS no input filter
     21 [0] PB_21_ANT_RESET no input filter
-    20 [0] PB_20_LED_RED no input filter
+    20 [0] PB_20_LED0_RED no input filter
 
-    19 [0] PB_19_LED_GRN no input filter
-    18 [0] PB_18_LED_BLU no input filter
-    17 [0] PB_17_LED_YLW no input filter
-    16 [0] PB_16_LED_CYN no input filter
+    19 [0] PB_19_LED2_RED no input filter
+    18 [0] PB_18_LED3_RED no input filter
+    17 [0] PB_17_LED1_RED no input filter
+    16 [0] PB_16_LCD_RD no input filter
 
-    15 [0] PB_15_LED_ORG no input filter
-    14 [0] PB_14_LED_PRP no input filter
-    13 [0] PB_13_LED_WHT no input filter
-    12 [0] PB_12_LCD_BL_BLU no input filter
+    15 [0] PB_15_LCD_A0 no input filter
+    14 [0] PB_14_LCD_RST no input filter
+    13 [0] PB_13_LED1_BLU no input filter
+    12 [0] PB_12_LCD_CS no input filter
 
-    11 [0] PB_11_LCD_BL_GRN no input filter
-    10 [0] PB_10_LCD_BL_RED no input filter
-    09 [0] PB_09_LCD_RST no input filter
-    08 [0] PB_08_TP62 no input filter
+    11 [0] PB_11_VSLIDE_CH2_Y no input filter
+    10 [0] PB_10_VSLIDE_CH2_X no input filter
+    09 [0] PB_09_VSLIDE_CH1_Y no input filter
+    08 [0] PB_08_VSLIDE_CH1_X no input filter
 
-    07 [0] PB_07_TP60 no input filter
-    06 [0] PB_06_TP58 no input filter
-    05 [0] PB_05_TP56 no input filter
+    07 [0] PB_07_VSLIDE_CH0_Y no input filter
+    06 [0] PB_06_VSLIDE_CH0_X no input filter
+    05 [0] PB_05_LCD_BL no input filter
     04 [0] PB_04_BLADE_AN1 no input filter
 
     03 [0] PB_03_BLADE_AN0 no input filter
-    02 [0] PB_02_BUTTON3 no input filter
-    01 [0] PB_01_BUTTON2 no input filter
+    02 [0] PB_02_LED1_GRN no input filter
+    01 [0] PB_01_LED0_BLU no input filter
     00 [0] PB_00_BUTTON1 no input filter
 */
 
@@ -1003,19 +1001,19 @@ Default start-up IO values are held here.
 #define PIOA_SODR_INIT (u32)0x88010000
 /* 
     31 [1] PA_31_HEARTBEAT output high 
-    30 [0] PA_30_AN_DEMO N/A
-    29 [0] PA_29_BUZZER2 output low
-    28 [0] PA_28_BUZZER1 output low
+    30 [0] PA_30_TP44 N/A
+    29 [0] PA_29_LED0_GRN output low
+    28 [0] PA_28_BUZZER output low
 
     27 [1] PA_27_CLOCK_OUT output high
-    26 [0] PA_26_ANT_PWR_EN output high Z
+    26 [0] PA_26_LED2_GRN output low
     25 [0] PA_25_ANT_USPI2_SCK N/A
-    24 [0] PA_24_SD_USPI1_SCK N/A
+    24 [0] PA_24_LCD_USPI1_SCK N/A
 
     23 [0] PA_23_ANT_USPI2_MOSI N/A
     22 [0] PA_22_ANT_USPI2_MISO N/A
-    21 [0] PA_21_SD_USPI1_MISO N/A
-    20 [0] PA_20_SD_USPI1_MOSI N/A
+    21 [0] PA_21_TP57 N/A
+    20 [0] PA_20_LCD_USPI1_MOSI N/A
 
     19 [0] PA_19_DEBUG_U0_PIMO N/A
     18 [0] PA_18_DEBUG_U0_POMI N/A
@@ -1030,20 +1028,20 @@ Default start-up IO values are held here.
     11 [0] PA_11_BLADE_UPIMO N/A
     10 [0] PA_10_I2C_SCL N/A
     09 [0] PA_09_I2C_SDA N/A
-    08 [0] PA_08_SD_CS_MCDA3 N/A
+    08 [0] PA_08_LED3_BLU output low
 
-    07 [0] PA_07_HSMCI_MCDA2 N/A
-    06 [0] PA_06_HSMCI_MCDA1 N/A
-    05 [0] PA_05_HSMCI_MCDA0 N/A
-    04 [0] PA_04_HSMCI_MCCDA N/A
+    07 [0] PA_07_LED3_GRN output low
+    06 [0] PA_06_LED2_BLU output low
+    05 [0] PA_05_HSLIDE_CH2_Y N/A
+    04 [0] PA_04_HSLIDE_CH2_X output low
 
-    03 [0] PA_03_HSMCI_MCCK N/A
-    02 [0] PA_02_SD_DETECT N/A
-    01 [0] PA_01_SD_WP N/A
-    00 [0] PA_00_TP54 N/A
+    03 [0] PA_03_HSLIDE_CH1_Y N/A
+    02 [0] PA_02_HSLIDE_CH1_X output low
+    01 [0] PA_01_HSLIDE_CH0_Y N/A
+    00 [0] PA_00_HSLIDE_CH0_X output low
 */
 
-#define PIOB_SODR_INIT (u32)0x01BFFE00
+#define PIOB_SODR_INIT (u32)0x01A1D000
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1058,31 +1056,31 @@ Default start-up IO values are held here.
     23 [1] PB_23_ANT_MRDY output high
     22 [0] PB_22_ANT_USPI2_CS N/A
     21 [1] PB_21_ANT_RESET output high
-    20 [1] PB_20_LED_RED output high
+    20 [0] PB_20_LED0_RED output low
 
-    19 [1] PB_19_LED_GRN output high
-    18 [1] PB_18_LED_BLU output high
-    17 [1] PB_17_LED_YLW output high
-    16 [1] PB_16_LED_CYN output high
+    19 [0] PB_19_LED2_RED output low
+    18 [0] PB_18_LED3_RED output low
+    17 [0] PB_17_LED1_RED output low
+    16 [1] PB_16_LCD_RD output high
 
-    15 [1] PB_15_LED_ORG output high
-    14 [1] PB_14_LED_PRP output high
-    13 [1] PB_13_LED_WHT output high
-    12 [1] PB_12_LCD_BL_BLU output high
+    15 [1] PB_15_LCD_A0 output high
+    14 [1] PB_14_LCD_RST output high
+    13 [0] PB_13_LED1_BLU output low
+    12 [1] PB_12_LCD_CS output high
 
-    11 [1] PB_11_LCD_BL_GRN output high
-    10 [1] PB_10_LCD_BL_RED output high
-    09 [1] PB_09_LCD_RST output high
-    08 [0] PB_08_TP62 N/A
+    11 [0] PB_11_VSLIDE_CH2_Y N/A
+    10 [0] PB_10_VSLIDE_CH2_X output low
+    09 [0] PB_09_VSLIDE_CH1_Y N/A
+    08 [0] PB_08_VSLIDE_CH1_X output low
 
-    07 [0] PB_07_TP60 N/A
-    06 [0] PB_06_TP58 N/A
-    05 [0] PB_05_TP56 N/A
+    07 [0] PB_07_VSLIDE_CH0_Y N/A
+    06 [0] PB_06_VSLIDE_CH0_X output low
+    05 [0] PB_05_LCD_BL output low
     04 [0] PB_04_BLADE_AN1 N/A
 
     03 [0] PB_03_BLADE_AN0 N/A
-    02 [0] PB_02_BUTTON3 N/A
-    01 [0] PB_01_BUTTON2 N/A
+    02 [0] PB_02_LED1_GRN output low
+    01 [0] PB_01_LED0_BLU output low
     00 [0] PB_00_BUTTON1 N/A
 */
 
@@ -1091,22 +1089,22 @@ Initial output values are stored here.
 0: No effect
 1: Clears the data to be driven on the I/O line.
 */
-#define PIOA_CODR_INIT (u32)0x30000000
+#define PIOA_CODR_INIT (u32)0x340001D5
 /* 
     31 [0] PA_31_HEARTBEAT output high 
-    30 [0] PA_30_AN_DEMO N/A
-    29 [1] PA_29_BUZZER2 output low
-    28 [1] PA_28_BUZZER1 output low
+    30 [0] PA_30_TP44 N/A
+    29 [1] PA_29_LED0_GRN output low
+    28 [1] PA_28_BUZZER output low
 
     27 [0] PA_27_CLOCK_OUT output high
-    26 [0] PA_26_ANT_PWR_EN output high Z
+    26 [1] PA_26_LED2_GRN output low
     25 [0] PA_25_ANT_USPI2_SCK N/A
-    24 [0] PA_24_SD_USPI1_SCK N/A
+    24 [0] PA_24_LCD_USPI1_SCK N/A
 
     23 [0] PA_23_ANT_USPI2_MOSI N/A
     22 [0] PA_22_ANT_USPI2_MISO N/A
-    21 [0] PA_21_SD_USPI1_MISO N/A
-    20 [0] PA_20_SD_USPI1_MOSI N/A
+    21 [0] PA_21_TP57 N/A
+    20 [0] PA_20_LCD_USPI1_MOSI N/A
 
     19 [0] PA_19_DEBUG_U0_PIMO N/A
     18 [0] PA_18_DEBUG_U0_POMI N/A
@@ -1121,20 +1119,20 @@ Initial output values are stored here.
     11 [0] PA_11_BLADE_UPIMO N/A
     10 [0] PA_10_I2C_SCL N/A
     09 [0] PA_09_I2C_SDA N/A
-    08 [0] PA_08_SD_CS_MCDA3 N/A
+    08 [1] PA_08_LED3_BLU output low
 
-    07 [0] PA_07_HSMCI_MCDA2 N/A
-    06 [0] PA_06_HSMCI_MCDA1 N/A
-    05 [0] PA_05_HSMCI_MCDA0 N/A
-    04 [0] PA_04_HSMCI_MCCDA N/A
+    07 [1] PA_07_LED3_GRN output low
+    06 [1] PA_06_LED2_BLU output low
+    05 [0] PA_05_HSLIDE_CH2_Y N/A
+    04 [1] PA_04_HSLIDE_CH2_X output low
 
-    03 [0] PA_03_HSMCI_MCCK N/A
-    02 [0] PA_02_SD_DETECT N/A
-    01 [0] PA_01_SD_WP N/A
-    00 [0] PA_00_TP54 N/A
+    03 [0] PA_03_HSLIDE_CH1_Y N/A
+    02 [1] PA_02_HSLIDE_CH1_X output low
+    01 [0] PA_01_HSLIDE_CH0_Y N/A
+    00 [1] PA_00_HSLIDE_CH0_X output low
 */
 
-#define PIOB_CODR_INIT (u32)0x00000000
+#define PIOB_CODR_INIT (u32)0x001E2566
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1149,31 +1147,31 @@ Initial output values are stored here.
     23 [0] PB_23_ANT_MRDY output high
     22 [0] PB_22_ANT_USPI2_CS N/A
     21 [0] PB_21_ANT_RESET output high
-    20 [0] PB_20_LED_RED output high
+    20 [1] PB_20_LED0_RED output low
 
-    19 [0] PB_19_LED_GRN output high
-    18 [0] PB_18_LED_BLU output high
-    17 [0] PB_17_LED_YLW output high
-    16 [0] PB_16_LED_CYN output high
+    19 [1] PB_19_LED2_RED output low
+    18 [1] PB_18_LED3_RED output low
+    17 [1] PB_17_LED1_RED output low
+    16 [0] PB_16_LCD_RD output high
 
-    15 [0] PB_15_LED_ORG output high
-    14 [0] PB_14_LED_PRP output high
-    13 [0] PB_13_LED_WHT output high
-    12 [0] PB_12_LCD_BL_BLU output high
+    15 [0] PB_15_LCD_A0 output high
+    14 [0] PB_14_LCD_RST output high
+    13 [1] PB_13_LED1_BLU output low
+    12 [0] PB_12_LCD_CS output high
 
-    11 [0] PB_11_LCD_BL_GRN output high
-    10 [0] PB_10_LCD_BL_RED output high
-    09 [0] PB_09_LCD_RST output high
-    08 [0] PB_08_TP62 N/A
+    11 [0] PB_11_VSLIDE_CH2_Y N/A
+    10 [1] PB_10_VSLIDE_CH2_X output low
+    09 [0] PB_09_VSLIDE_CH1_Y N/A
+    08 [1] PB_08_VSLIDE_CH1_X output low
 
-    07 [0] PB_07_TP60 N/A
-    06 [0] PB_06_TP58 N/A
-    05 [0] PB_05_TP56 N/A
+    07 [0] PB_07_VSLIDE_CH0_Y N/A
+    06 [1] PB_06_VSLIDE_CH0_X output low
+    05 [1] PB_05_LCD_BL output low
     04 [0] PB_04_BLADE_AN1 N/A
 
     03 [0] PB_03_BLADE_AN0 N/A
-    02 [0] PB_02_BUTTON3 N/A
-    01 [0] PB_01_BUTTON2 N/A
+    02 [1] PB_02_LED1_GRN output low
+    01 [1] PB_01_LED0_BLU output low
     00 [0] PB_00_BUTTON1 N/A
 */
 
@@ -1181,22 +1179,22 @@ Initial output values are stored here.
 0: No effect
 1: Enables Multi Drive on the I/O line.
 */
-#define PIOA_MDER_INIT (u32)0x04000600
+#define PIOA_MDER_INIT (u32)0x00000600
 /* 
     31 [0] PA_31_HEARTBEAT
-    30 [0] PA_30_AN_DEMO
-    29 [0] PA_29_BUZZER2
-    28 [0] PA_28_BUZZER1
+    30 [0] PA_30_TP44
+    29 [0] PA_29_LED0_GRN
+    28 [0] PA_28_BUZZER
 
     27 [0] PA_27_CLOCK_OUT
-    26 [1] PA_26_ANT_PWR_EN open drain
+    26 [0] PA_26_LED2_GRN 
     25 [0] PA_25_ANT_USPI2_SCK
-    24 [0] PA_24_SD_USPI1_SCK
+    24 [0] PA_24_LCD_USPI1_SCK
 
     23 [0] PA_23_ANT_USPI2_MOSI
     22 [0] PA_22_ANT_USPI2_MISO
-    21 [0] PA_21_SD_USPI1_MISO
-    20 [0] PA_20_SD_USPI1_MOSI
+    21 [0] PA_21_TP57
+    20 [0] PA_20_LCD_USPI1_MOSI
 
     19 [0] PA_19_DEBUG_U0_PIMO
     18 [0] PA_18_DEBUG_U0_POMI
@@ -1211,17 +1209,17 @@ Initial output values are stored here.
     11 [0] PA_11_BLADE_UPIMO
     10 [1] PA_10_I2C_SCL open drain
     09 [1] PA_09_I2C_SDA open drain
-    08 [0] PA_08_SD_CS_MCDA3
+    08 [0] PA_08_LED3_BLU
 
-    07 [0] PA_07_HSMCI_MCDA2
-    06 [0] PA_06_HSMCI_MCDA1
-    05 [0] PA_05_HSMCI_MCDA0
-    04 [0] PA_04_HSMCI_MCCDA
+    07 [0] PA_07_LED3_GRN
+    06 [0] PA_06_LED2_BLU
+    05 [0] PA_05_HSLIDE_CH2_Y
+    04 [0] PA_04_HSLIDE_CH2_X
 
-    03 [0] PA_03_HSMCI_MCCK
-    02 [0] PA_02_SD_DETECT
-    01 [0] PA_01_SD_WP
-    00 [0] PA_00_TP54
+    03 [0] PA_03_HSLIDE_CH1_Y
+    02 [0] PA_02_HSLIDE_CH1_X
+    01 [0] PA_01_HSLIDE_CH0_Y
+    00 [0] PA_00_HSLIDE_CH0_X
 */
 
 #define PIOB_MDER_INIT (u32)0x00000000
@@ -1239,31 +1237,31 @@ Initial output values are stored here.
     23 [0] PB_23_ANT_MRDY
     22 [0] PB_22_ANT_USPI2_CS
     21 [0] PB_21_ANT_RESET
-    20 [0] PB_20_LED_RED
+    20 [0] PB_20_LED0_RED
 
-    19 [0] PB_19_LED_GRN
-    18 [0] PB_18_LED_BLU
-    17 [0] PB_17_LED_YLW
-    16 [0] PB_16_LED_CYN
+    19 [0] PB_19_LED2_RED
+    18 [0] PB_18_LED3_RED
+    17 [0] PB_17_LED1_RED
+    16 [0] PB_16_LCD_RD
 
-    15 [0] PB_15_LED_ORG
-    14 [0] PB_14_LED_PRP
-    13 [0] PB_13_LED_WHT
-    12 [0] PB_12_LCD_BL_BLU
+    15 [0] PB_15_LCD_A0
+    14 [0] PB_14_LCD_RST
+    13 [0] PB_13_LED1_BLU
+    12 [0] PB_12_LCD_CS
 
-    11 [0] PB_11_LCD_BL_GRN
-    10 [0] PB_10_LCD_BL_RED
-    09 [0] PB_09_LCD_RST
-    08 [0] PB_08_TP62
+    11 [0] PB_11_VSLIDE_CH2_Y
+    10 [0] PB_10_VSLIDE_CH2_X
+    09 [0] PB_09_VSLIDE_CH1_Y
+    08 [0] PB_08_VSLIDE_CH1_X
 
-    07 [0] PB_07_TP60
-    06 [0] PB_06_TP58
-    05 [0] PB_05_TP56
+    07 [0] PB_07_VSLIDE_CH0_Y
+    06 [0] PB_06_VSLIDE_CH0_X
+    05 [0] PB_05_LCD_BL
     04 [0] PB_04_BLADE_AN1
 
     03 [0] PB_03_BLADE_AN0
-    02 [0] PB_02_BUTTON3
-    01 [0] PB_01_BUTTON2
+    02 [0] PB_02_LED1_GRN
+    01 [0] PB_01_LED0_BLU
     00 [0] PB_00_BUTTON1
 */
 
@@ -1271,22 +1269,22 @@ Initial output values are stored here.
 0: No effect
 1: Disables Multi Drive on the I/O line.
 */
-#define PIOA_MDDR_INIT (u32)0xFBFFF9FF
+#define PIOA_MDDR_INIT (u32)0xFFFFF9FF
 /* 
     31 [1] PA_31_HEARTBEAT not open drain
-    30 [1] PA_30_AN_DEMO not open drain
-    29 [1] PA_29_BUZZER2 not open drain
-    28 [1] PA_28_BUZZER1 not open drain
+    30 [1] PA_30_TP44 not open drain
+    29 [1] PA_29_LED0_GRN not open drain
+    28 [1] PA_28_BUZZER not open drain
 
     27 [1] PA_27_CLOCK_OUT not open drain
-    26 [0] PA_26_ANT_PWR_EN
+    26 [1] PA_26_LED2_GRN not open drain
     25 [1] PA_25_ANT_USPI2_SCK not open drain
-    24 [1] PA_24_SD_USPI1_SCK not open drain
+    24 [1] *PA_24_LCD_USPI1_SCK not open drain
 
     23 [1] PA_23_ANT_USPI2_MOSI not open drain
     22 [1] PA_22_ANT_USPI2_MISO not open drain
-    21 [1] PA_21_SD_USPI1_MISO not open drain
-    20 [1] PA_20_SD_USPI1_MOSI not open drain
+    21 [1] *PA_21_TP57 not open drain
+    20 [1] *PA_20_LCD_USPI1_MOSI not open drain
 
     19 [1] PA_19_DEBUG_U0_PIMO not open drain
     18 [1] PA_18_DEBUG_U0_POMI not open drain
@@ -1301,20 +1299,20 @@ Initial output values are stored here.
     11 [1] PA_11_BLADE_UPIMO not open drain
     10 [0] PA_10_I2C_SCL
     09 [0] PA_09_I2C_SDA
-    08 [1] PA_08_SD_CS_MCDA3 not open drain
+    08 [1] PA_08_LED3_BLU not open drain
 
-    07 [1] PA_07_HSMCI_MCDA2 not open drain
-    06 [1] PA_06_HSMCI_MCDA1 not open drain
-    05 [1] PA_05_HSMCI_MCDA0 not open drain
-    04 [1] PA_04_HSMCI_MCCDA not open drain
+    07 [1] PA_07_LED3_GRN not open drain
+    06 [1] PA_06_LED2_BLU not open drain
+    05 [1] PA_05_HSLIDE_CH2_Y not open drain
+    04 [1] PA_04_HSLIDE_CH2_X not open drain
 
-    03 [1] PA_03_HSMCI_MCCK not open drain
-    02 [1] PA_02_SD_DETECT not open drain
-    01 [1] PA_01_SD_WP not open drain
-    00 [1] PA_00_TP54 not open drain
+    03 [1] PA_03_HSLIDE_CH1_Y not open drain
+    02 [1] PA_02_HSLIDE_CH1_X not open drain
+    01 [1] PA_01_HSLIDE_CH0_Y not open drain
+    00 [1] PA_00_HSLIDE_CH0_X not open drain
 */
 
-#define PIOB_MDDR_INIT (u32)0x01FFFFFF
+#define PIOB_MDDR_INIT (u32)0x01DFFFFF
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1328,32 +1326,32 @@ Initial output values are stored here.
 
     23 [1] PB_23_ANT_MRDY not open drain
     22 [1] PB_22_ANT_USPI2_CS not open drain
-    21 [1] PB_21_ANT_RESET not open drain
-    20 [1] PB_20_LED_RED not open drain
+    21 [0] PB_21_ANT_RESET open drain
+    20 [1] PB_20_LED0_RED not open drain
 
-    19 [1] PB_19_LED_GRN not open drain
-    18 [1] PB_18_LED_BLU not open drain
-    17 [1] PB_17_LED_YLW not open drain
-    16 [1] PB_16_LED_CYN not open drain
+    19 [1] PB_19_LED2_RED not open drain
+    18 [1] PB_18_LED3_RED not open drain
+    17 [1] PB_17_LED1_RED not open drain
+    16 [1] PB_16_LCD_RD not open drain
 
-    15 [1] PB_15_LED_ORG not open drain
-    14 [1] PB_14_LED_PRP not open drain
-    13 [1] PB_13_LED_WHT not open drain
-    12 [1] PB_12_LCD_BL_BLU not open drain
+    15 [1] PB_15_LCD_A0 not open drain
+    14 [1] PB_14_LCD_RST not open drain
+    13 [1] PB_13_LED1_BLU not open drain
+    12 [1] PB_12_LCD_CS not open drain
 
-    11 [1] PB_11_LCD_BL_GRN not open drain
-    10 [1] PB_10_LCD_BL_RED not open drain
-    09 [1] PB_09_LCD_RST not open drain
-    08 [1] PB_08_TP62 not open drain
+    11 [1] PB_11_VSLIDE_CH2_Y not open drain
+    10 [1] PB_10_VSLIDE_CH2_X not open drain
+    09 [1] PB_09_VSLIDE_CH1_Y not open drain
+    08 [1] PB_08_VSLIDE_CH1_X not open drain
 
-    07 [1] PB_07_TP60 not open drain
-    06 [1] PB_06_TP58 not open drain
-    05 [1] PB_05_TP56 not open drain
+    07 [1] PB_07_VSLIDE_CH0_Y not open drain
+    06 [1] PB_06_VSLIDE_CH0_X not open drain
+    05 [1] PB_05_LCD_BL not open drain
     04 [1] PB_04_BLADE_AN1 not open drain
 
     03 [1] PB_03_BLADE_AN0 not open drain
-    02 [1] PB_02_BUTTON3 not open drain
-    01 [1] PB_01_BUTTON2 not open drain
+    02 [1] PB_02_LED1_GRN not open drain
+    01 [1] PB_01_LED0_BLU not open drain
     00 [1] PB_00_BUTTON1 not open drain
 */
 
@@ -1361,22 +1359,22 @@ Initial output values are stored here.
 0: No effect
 1: Disables the pull up resistor on the I/O line.
 */
-#define PIOA_PPUDR_INIT (u32)0xFFFFFFFE
+#define PIOA_PPUDR_INIT (u32)0xFFFFFFFF
 /* 
     31 [1] PA_31_HEARTBEAT no pull-up
-    30 [1] PA_30_AN_DEMO no pull-up
-    29 [1] PA_29_BUZZER2 no pull-up
-    28 [1] PA_28_BUZZER1 no pull-up
+    30 [1] PA_30_TP44 no pull-up
+    29 [1] PA_29_LED0_GRN no pull-up
+    28 [1] PA_28_BUZZER no pull-up
 
     27 [1] PA_27_CLOCK_OUT no pull-up
-    26 [1] PA_26_ANT_PWR_EN no pull-up
+    26 [1] PA_26_LED2_GRN no pull-up
     25 [1] PA_25_ANT_USPI2_SCK no pull-up
-    24 [1] PA_24_SD_USPI1_SCK no pull-up
+    24 [1] PA_24_LCD_USPI1_SCK no pull-up
 
     23 [1] PA_23_ANT_USPI2_MOSI no pull-up
     22 [1] PA_22_ANT_USPI2_MISO no pull-up
-    21 [1] PA_21_SD_USPI1_MISO no pull-up
-    20 [1] PA_20_SD_USPI1_MOSI no pull-up
+    21 [1] PA_21_TP57 no pull-up
+    20 [1] PA_20_LCD_USPI1_MOSI no pull-up
 
     19 [1] PA_19_DEBUG_U0_PIMO no pull-up
     18 [1] PA_18_DEBUG_U0_POMI no pull-up
@@ -1391,20 +1389,20 @@ Initial output values are stored here.
     11 [1] PA_11_BLADE_UPIMO no pull-up
     10 [1] PA_10_I2C_SCL no pull-up
     09 [1] PA_09_I2C_SDA no pull-up
-    08 [1] PA_08_SD_CS_MCDA3 no pull-up
+    08 [1] PA_08_LED3_BLU no pull-up
 
-    07 [1] PA_07_HSMCI_MCDA2 no pull-up
-    06 [1] PA_06_HSMCI_MCDA1 no pull-up
-    05 [1] PA_05_HSMCI_MCDA0 no pull-up
-    04 [1] PA_04_HSMCI_MCCDA no pull-up
+    07 [1] PA_07_LED3_GRN no pull-up
+    06 [1] PA_06_LED2_BLU no pull-up
+    05 [1] PA_05_HSLIDE_CH2_Y no pull-up
+    04 [1] PA_04_HSLIDE_CH2_X no pull-up
 
-    03 [1] PA_03_HSMCI_MCCK no pull-up
-    02 [1] PA_02_SD_DETECT no pull-up
-    01 [1] PA_01_SD_WP no pull-up
-    00 [0] PA_00_TP54 pull-up enabled
+    03 [1] PA_03_HSLIDE_CH1_Y no pull-up
+    02 [1] PA_02_HSLIDE_CH1_X no pull-up
+    01 [1] PA_01_HSLIDE_CH0_Y no pull-up
+    00 [1] PA_00_HSLIDE_CH0_X no pull-up
 */
 
-#define PIOB_PPUDR_INIT (u32)0x01FFFE1F
+#define PIOB_PPUDR_INIT (u32)0x01DFFFFF
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1418,32 +1416,32 @@ Initial output values are stored here.
 
     23 [1] PB_23_ANT_MRDY no pull-up
     22 [1] PB_22_ANT_USPI2_CS no pull-up
-    21 [1] PB_21_ANT_RESET no pull-up
-    20 [1] PB_20_LED_RED no pull-up
+    21 [0] PB_21_ANT_RESET pull-up
+    20 [1] PB_20_LED0_RED no pull-up
 
-    19 [1] PB_19_LED_GRN no pull-up
-    18 [1] PB_18_LED_BLU no pull-up
-    17 [1] PB_17_LED_YLW no pull-up
-    16 [1] PB_16_LED_CYN no pull-up
+    19 [1] PB_19_LED2_RED no pull-up
+    18 [1] PB_18_LED3_RED no pull-up
+    17 [1] PB_17_LED1_RED no pull-up
+    16 [1] PB_16_LCD_RD no pull-up
 
-    15 [1] PB_15_LED_ORG no pull-up
-    14 [1] PB_14_LED_PRP no pull-up
-    13 [1] PB_13_LED_WHT no pull-up
-    12 [1] PB_12_LCD_BL_BLU no pull-up
+    15 [1] PB_15_LCD_A0 no pull-up
+    14 [1] PB_14_LCD_RST no pull-up
+    13 [1] PB_13_LED1_BLU no pull-up
+    12 [1] PB_12_LCD_CS no pull-up
 
-    11 [1] PB_11_LCD_BL_GRN no pull-up
-    10 [1] PB_10_LCD_BL_RED no pull-up
-    09 [1] PB_09_LCD_RST no pull-up
-    08 [0] PB_08_TP62 pull-up enabled
+    11 [1] PB_11_VSLIDE_CH2_Y no pull-up
+    10 [1] PB_10_VSLIDE_CH2_X no pull-up
+    09 [1] PB_09_VSLIDE_CH1_Y no pull-up
+    08 [1] PB_08_VSLIDE_CH1_X no pull-up 
 
-    07 [0] PB_07_TP60 pull-up enabled
-    06 [0] PB_06_TP58 pull-up enabled
-    05 [0] PB_05_TP56 pull-up enabled
+    07 [1] PB_07_VSLIDE_CH0_Y no pull-up
+    06 [1] PB_06_VSLIDE_CH0_X no pull-up
+    05 [1] PB_05_LCD_BL no pull-up
     04 [1] PB_04_BLADE_AN1 no pull-up
 
     03 [1] PB_03_BLADE_AN0 no pull-up
-    02 [1] PB_02_BUTTON3 no pull-up
-    01 [1] PB_01_BUTTON2 no pull-up
+    02 [1] *PB_02_LED1_GRN no pull-up
+    01 [1] *PB_01_LED0_BLU no pull-up
     00 [1] PB_00_BUTTON1 no pull-up
 */
 
@@ -1451,22 +1449,22 @@ Initial output values are stored here.
 0: No effect
 1: Enables the pull-up resistor on the selected pin
 */
-#define PIOA_PPUER_INIT (u32)0x00000001
+#define PIOA_PPUER_INIT (u32)0x00000000
 /*
     31 [0] PA_31_HEARTBEAT no pull-up
-    30 [0] PA_30_AN_DEMO no pull-up
-    29 [0] PA_29_BUZZER2 no pull-up
-    28 [0] PA_28_BUZZER1 no pull-up
+    30 [0] PA_30_TP44 no pull-up
+    29 [0] PA_29_LED0_GRN no pull-up
+    28 [0] PA_28_BUZZER no pull-up
 
     27 [0] PA_27_CLOCK_OUT no pull-up
-    26 [0] PA_26_ANT_PWR_EN no pull-up
+    26 [0] PA_26_LED2_GRN no pull-up
     25 [0] PA_25_ANT_USPI2_SCK no pull-up
-    24 [0] PA_24_SD_USPI1_SCK no pull-up
+    24 [0] PA_24_LCD_USPI1_SCK no pull-up
 
     23 [0] PA_23_ANT_USPI2_MOSI no pull-up
     22 [0] PA_22_ANT_USPI2_MISO no pull-up
-    21 [0] PA_21_SD_USPI1_MISO no pull-up
-    20 [0] PA_20_SD_USPI1_MOSI no pull-up
+    21 [0] PA_21_TP57 no pull-up
+    20 [0] PA_20_LCD_USPI1_MOSI no pull-up
 
     19 [0] PA_19_DEBUG_U0_PIMO no pull-up
     18 [0] PA_18_DEBUG_U0_POMI no pull-up
@@ -1481,20 +1479,20 @@ Initial output values are stored here.
     11 [0] PA_11_BLADE_UPIMO no pull-up
     10 [0] PA_10_I2C_SCL no pull-up
     09 [0] PA_09_I2C_SDA no pull-up
-    08 [0] PA_08_SD_CS_MCDA3 no pull-up
+    08 [0] PA_08_LED3_BLU no pull-up
 
-    07 [0] PA_07_HSMCI_MCDA2 no pull-up
-    06 [0] PA_06_HSMCI_MCDA1 no pull-up
-    05 [0] PA_05_HSMCI_MCDA0 no pull-up
-    04 [0] PA_04_HSMCI_MCCDA no pull-up
+    07 [0] PA_07_LED3_GRN no pull-up
+    06 [0] PA_06_LED2_BLU no pull-up
+    05 [0] PA_05_HSLIDE_CH2_Y no pull-up
+    04 [0] PA_04_HSLIDE_CH2_X no pull-up
 
-    03 [0] PA_03_HSMCI_MCCK no pull-up
-    02 [0] PA_02_SD_DETECT no pull-up
-    01 [0] PA_01_SD_WP no pull-up
-    00 [1] PA_00_TP54 pull-up enabled
+    03 [0] PA_03_HSLIDE_CH1_Y no pull-up
+    02 [0] PA_02_HSLIDE_CH1_X no pull-up
+    01 [0] PA_01_HSLIDE_CH0_Y no pull-up
+    00 [0] PA_00_HSLIDE_CH0_X no pull-up
 */
 
-#define PIOB_PPUER_INIT (u32)0x000001E0
+#define PIOB_PPUER_INIT (u32)0x00200000
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1508,32 +1506,32 @@ Initial output values are stored here.
 
     23 [0] PB_23_ANT_MRDY no pull-up
     22 [0] PB_22_ANT_USPI2_CS no pull-up
-    21 [0] PB_21_ANT_RESET no pull-up
-    20 [0] PB_20_LED_RED no pull-up
+    21 [1] PB_21_ANT_RESET pull-up
+    20 [0] PB_20_LED0_RED no pull-up
 
-    19 [0] PB_19_LED_GRN no pull-up
-    18 [0] PB_18_LED_BLU no pull-up
-    17 [0] PB_17_LED_YLW no pull-up
-    16 [0] PB_16_LED_CYN no pull-up
+    19 [0] PB_19_LED2_RED no pull-up
+    18 [0] PB_18_LED3_RED no pull-up
+    17 [0] PB_17_LED1_RED no pull-up
+    16 [0] PB_16_LCD_RD no pull-up
 
-    15 [0] PB_15_LED_ORG no pull-up
-    14 [0] PB_14_LED_PRP no pull-up
-    13 [0] PB_13_LED_WHT no pull-up
-    12 [0] PB_12_LCD_BL_BLU no pull-up
+    15 [0] PB_15_LCD_A0 no pull-up
+    14 [0] PB_14_LCD_RST no pull-up
+    13 [0] PB_13_LED1_BLU no pull-up
+    12 [0] PB_12_LCD_CS no pull-up
 
-    11 [0] PB_11_LCD_BL_GRN no pull-up
-    10 [0] PB_10_LCD_BL_RED no pull-up
-    09 [0] PB_09_LCD_RST no pull-up
-    08 [1] PB_08_TP62 pull-up enabled
+    11 [0] PB_11_VSLIDE_CH2_Y no pull-up
+    10 [0] PB_10_VSLIDE_CH2_X no pull-up
+    09 [0] PB_09_VSLIDE_CH1_Y no pull-up
+    08 [0] PB_08_VSLIDE_CH1_X no pull-up 
 
-    07 [1] PB_07_TP60 pull-up enabled
-    06 [1] PB_06_TP58 pull-up enabled
-    05 [1] PB_05_TP56 pull-up enabled
+    07 [0] PB_07_VSLIDE_CH0_Y no pull-up
+    06 [0] PB_06_VSLIDE_CH0_X no pull-up
+    05 [0] PB_05_LCD_BL no pull-up
     04 [0] PB_04_BLADE_AN1 no pull-up
 
     03 [0] PB_03_BLADE_AN0 no pull-up
-    02 [0] PB_02_BUTTON3 no pull-up
-    01 [0] PB_01_BUTTON2 no pull-up
+    02 [0] PB_02_LED1_GRN no pull-up
+    01 [0] PB_01_LED0_BLU no pull-up
     00 [0] PB_00_BUTTON1 no pull-up
 */
 
@@ -1542,22 +1540,22 @@ Initial output values are stored here.
 0: Assigns the I/O line to the Peripheral A function.
 1: Assigns the I/O line to the Peripheral B function.
 */
-#define PIOA_ABSR_INIT (u32)0x7B000000
+#define PIOA_ABSR_INIT (u32)0x1B000000
 /* 
     31 [0] PA_31_HEARTBEAT N/A
-    30 [1] PA_30_AN_DEMO PERIPHERAL B
-    29 [1] PA_29_BUZZER2 PERIPHERAL B
-    28 [1] PA_28_BUZZER1 PERIPHERAL B
+    30 [0] PA_30_TP44 N/A
+    29 [0] PA_29_LED0_GRN N/A
+    28 [1] PA_28_BUZZER PERIPHERAL B
 
     27 [1] PA_27_CLOCK_OUT PERIPHERAL B
-    26 [0] PA_26_ANT_PWR_EN N/A
+    26 [0] PA_26_LED2_GRN N/A
     25 [1] PA_25_ANT_USPI2_SCK PERIPHERAL B
-    24 [1] PA_24_SD_USPI1_SCK PERIPHERAL B
+    24 [1] PA_24_LCD_USPI1_SCK PERIPHERAL B
 
     23 [0] PA_23_ANT_USPI2_MOSI PERIPHERAL A
     22 [0] PA_22_ANT_USPI2_MISO PERIPHERAL A
-    21 [0] PA_21_SD_USPI1_MISO PERIPHERAL A
-    20 [0] PA_20_SD_USPI1_MOSI PERIPHERAL A
+    21 [0] PA_21_TP57 N/A
+    20 [0] PA_20_LCD_USPI1_MOSI PERIPHERAL A
 
     19 [0] PA_19_DEBUG_U0_PIMO PERIPHERAL A
     18 [0] PA_18_DEBUG_U0_POMI PERIPHERAL A
@@ -1572,17 +1570,17 @@ Initial output values are stored here.
     11 [0] PA_11_BLADE_UPIMO PERIPHERAL A
     10 [0] PA_10_I2C_SCL PERIPHERAL A
     09 [0] PA_09_I2C_SDA PERIPHERAL A
-    08 [0] PA_08_SD_CS_MCDA3 PERIPHERAL A
+    08 [0] PA_08_LED3_BLU N/A
 
-    07 [0] PA_07_HSMCI_MCDA2 PERIPHERAL A
-    06 [0] PA_06_HSMCI_MCDA1 PERIPHERAL A
-    05 [0] PA_05_HSMCI_MCDA0 PERIPHERAL A
-    04 [0] PA_04_HSMCI_MCCDA PERIPHERAL A
+    07 [0] PA_07_LED3_GRN N/A
+    06 [0] PA_06_LED2_BLU N/A
+    05 [0] PA_05_HSLIDE_CH2_Y N/A
+    04 [0] PA_04_HSLIDE_CH2_X N/A
 
-    03 [0] PA_03_HSMCI_MCCK PERIPHERAL A
-    02 [0] PA_02_SD_DETECT N/A
-    01 [0] PA_01_SD_WP N/A
-    00 [0] PA_00_TP54 N/A
+    03 [0] PA_03_HSLIDE_CH1_Y N/A
+    02 [0] PA_02_HSLIDE_CH1_X N/A
+    01 [0] PA_01_HSLIDE_CH0_Y N/A
+    00 [0] PA_00_HSLIDE_CH0_X N/A
 */
 
 #define PIOB_ABSR_INIT (u32)0x00400018
@@ -1600,31 +1598,31 @@ Initial output values are stored here.
     23 [0] PB_23_ANT_MRDY N/A
     22 [1] PB_22_ANT_USPI2_CS PERIPHERAL B
     21 [0] PB_21_ANT_RESET N/A
-    20 [0] PB_20_LED_RED N/A
+    20 [0] PB_20_LED0_RED N/A
 
-    19 [0] PB_19_LED_GRN N/A
-    18 [0] PB_18_LED_BLU N/A
-    17 [0] PB_17_LED_YLW N/A
-    16 [0] PB_16_LED_CYN N/A
+    19 [0] PB_19_LED2_RED N/A
+    18 [0] PB_18_LED3_RED N/A
+    17 [0] PB_17_LED1_RED N/A
+    16 [0] PB_16_LCD_RD N/A
 
-    15 [0] PB_15_LED_ORG N/A
-    14 [0] PB_14_LED_PRP N/A
-    13 [0] PB_13_LED_WHT N/A
-    12 [0] PB_12_LCD_BL_BLU N/A
+    15 [0] PB_15_LCD_A0 N/A
+    14 [0] PB_14_LCD_RST N/A
+    13 [0] PB_13_LED1_BLU N/A
+    12 [0] PB_12_LCD_CS N/A
 
-    11 [0] PB_11_LCD_BL_GRN N/A
-    10 [0] PB_10_LCD_BL_RED N/A
-    09 [0] PB_09_LCD_RST N/A
-    08 [0] PB_08_TP62 N/A
+    11 [0] PB_11_VSLIDE_CH2_Y N/A
+    10 [0] PB_10_VSLIDE_CH2_X N/A
+    09 [0] PB_09_VSLIDE_CH1_Y N/A
+    08 [0] PB_08_VSLIDE_CH1_X N/A
 
-    07 [0] PB_07_TP60 N/A
-    06 [0] PB_06_TP58 N/A
-    05 [0] PB_05_TP56 N/A
+    07 [0] PB_07_VSLIDE_CH0_Y N/A
+    06 [0] PB_06_VSLIDE_CH0_X N/A
+    05 [0] PB_05_LCD_BL N/A
     04 [1] PB_04_BLADE_AN1 PERIPHERAL B
 
     03 [1] PB_03_BLADE_AN0 PERIPHERAL B
-    02 [0] PB_02_BUTTON3 N/A
-    01 [0] PB_01_BUTTON2 N/A
+    02 [0] PB_02_LED1_GRN N/A
+    01 [0] PB_01_LED0_BLU N/A
     00 [0] PB_00_BUTTON1 N/A
 */
 
@@ -1635,19 +1633,19 @@ Initial output values are stored here.
 #define PIOA_SCIFSR_INIT (u32)0x00000000
 /* 
     31 [0] PA_31_HEARTBEAT
-    30 [0] PA_30_AN_DEMO
-    29 [0] PA_29_BUZZER2
-    28 [0] PA_28_BUZZER1
+    30 [0] PA_30_TP44
+    29 [0] PA_29_LED0_GRN
+    28 [0] PA_28_BUZZER
 
     27 [0] PA_27_CLOCK_OUT
-    26 [0] PA_26_ANT_PWR_EN
+    26 [0] PA_26_LED2_GRN
     25 [0] PA_25_ANT_USPI2_SCK
-    24 [0] PA_24_SD_USPI1_SCK
+    24 [0] PA_24_LCD_USPI1_SCK
 
     23 [0] PA_23_ANT_USPI2_MOSI
     22 [0] PA_22_ANT_USPI2_MISO
-    21 [0] PA_21_SD_USPI1_MISO
-    20 [0] PA_20_SD_USPI1_MOSI
+    21 [0] PA_21_TP57
+    20 [0] PA_20_LCD_USPI1_MOSI
 
     19 [0] PA_19_DEBUG_U0_PIMO
     18 [0] PA_18_DEBUG_U0_POMI
@@ -1662,17 +1660,17 @@ Initial output values are stored here.
     11 [0] PA_11_BLADE_UPIMO
     10 [0] PA_10_I2C_SCL
     09 [0] PA_09_I2C_SDA
-    08 [0] PA_08_SD_CS_MCDA3
+    08 [0] PA_08_LED3_BLU
 
-    07 [0] PA_07_HSMCI_MCDA2
-    06 [0] PA_06_HSMCI_MCDA1
-    05 [0] PA_05_HSMCI_MCDA0
-    04 [0] PA_04_HSMCI_MCCDA
+    07 [0] PA_07_LED3_GRN
+    06 [0] PA_06_LED2_BLU
+    05 [0] PA_05_HSLIDE_CH2_Y
+    04 [0] PA_04_HSLIDE_CH2_X
 
-    03 [0] PA_03_HSMCI_MCCK
-    02 [0] PA_02_SD_DETECT
-    01 [0] PA_01_SD_WP
-    00 [0] PA_00_TP54
+    03 [0] PA_03_HSLIDE_CH1_Y
+    02 [0] PA_02_HSLIDE_CH1_X
+    01 [0] PA_01_HSLIDE_CH0_Y
+    00 [0] PA_00_HSLIDE_CH0_X
 */
 
 #define PIOB_SCIFSR_INIT (u32)0x00000000
@@ -1690,31 +1688,31 @@ Initial output values are stored here.
     23 [0] PB_23_ANT_MRDY
     22 [0] PB_22_ANT_USPI2_CS
     21 [0] PB_21_ANT_RESET
-    20 [0] PB_20_LED_RED
+    20 [0] PB_20_LED0_RED
 
-    19 [0] PB_19_LED_GRN
-    18 [0] PB_18_LED_BLU
-    17 [0] PB_17_LED_YLW
-    16 [0] PB_16_LED_CYN
+    19 [0] PB_19_LED2_RED
+    18 [0] PB_18_LED3_RED
+    17 [0] PB_17_LED1_RED
+    16 [0] PB_16_LCD_RD
 
-    15 [0] PB_15_LED_ORG
-    14 [0] PB_14_LED_PRP
-    13 [0] PB_13_LED_WHT
-    12 [0] PB_12_LCD_BL_BLU
+    15 [0] PB_15_LCD_A0
+    14 [0] PB_14_LCD_RST
+    13 [0] PB_13_LED1_BLU
+    12 [0] PB_12_LCD_CS
 
-    11 [0] PB_11_LCD_BL_GRN
-    10 [0] PB_10_LCD_BL_RED
-    09 [0] PB_09_LCD_RST
-    08 [0] PB_08_TP62
+    11 [0] PB_11_VSLIDE_CH2_Y
+    10 [0] PB_10_VSLIDE_CH2_X
+    09 [0] PB_09_VSLIDE_CH1_Y
+    08 [0] PB_08_VSLIDE_CH1_X
 
-    07 [0] PB_07_TP60
-    06 [0] PB_06_TP58
-    05 [0] PB_05_TP56
+    07 [0] PB_07_VSLIDE_CH0_Y
+    06 [0] PB_06_VSLIDE_CH0_X
+    05 [0] PB_05_LCD_BL
     04 [0] PB_04_BLADE_AN1
 
     03 [0] PB_03_BLADE_AN0
-    02 [0] PB_02_BUTTON3
-    01 [0] PB_01_BUTTON2
+    02 [0] PB_02_LED1_GRN
+    01 [0] PB_01_LED0_BLU
     00 [0] PB_00_BUTTON1
 */
 
@@ -1725,19 +1723,19 @@ Initial output values are stored here.
 #define PIOA_DIFSR_INIT (u32)0x00000000
 /* 
     31 [0] PA_31_HEARTBEAT
-    30 [0] PA_30_AN_DEMO
-    29 [0] PA_29_BUZZER2
-    28 [0] PA_28_BUZZER1
+    30 [0] PA_30_TP44
+    29 [0] PA_29_LED0_GRN
+    28 [0] PA_28_BUZZER
 
     27 [0] PA_27_CLOCK_OUT
-    26 [0] PA_26_ANT_PWR_EN
+    26 [0] PA_26_LED2_GRN
     25 [0] PA_25_ANT_USPI2_SCK
-    24 [0] PA_24_SD_USPI1_SCK
+    24 [0] PA_24_LCD_USPI1_SCK
 
     23 [0] PA_23_ANT_USPI2_MOSI
     22 [0] PA_22_ANT_USPI2_MISO
-    21 [0] PA_21_SD_USPI1_MISO
-    20 [0] PA_20_SD_USPI1_MOSI
+    21 [0] PA_21_TP57
+    20 [0] PA_20_LCD_USPI1_MOSI
 
     19 [0] PA_19_DEBUG_U0_PIMO
     18 [0] PA_18_DEBUG_U0_POMI
@@ -1752,17 +1750,17 @@ Initial output values are stored here.
     11 [0] PA_11_BLADE_UPIMO
     10 [0] PA_10_I2C_SCL
     09 [0] PA_09_I2C_SDA
-    08 [0] PA_08_SD_CS_MCDA3
+    08 [0] PA_08_LED3_BLU
 
-    07 [0] PA_07_HSMCI_MCDA2
-    06 [0] PA_06_HSMCI_MCDA1
-    05 [0] PA_05_HSMCI_MCDA0
-    04 [0] PA_04_HSMCI_MCCDA
+    07 [0] PA_07_LED3_GRN
+    06 [0] PA_06_LED2_BLU
+    05 [0] PA_05_HSLIDE_CH2_Y
+    04 [0] PA_04_HSLIDE_CH2_X
 
-    03 [0] PA_03_HSMCI_MCCK
-    02 [0] PA_02_SD_DETECT
-    01 [0] PA_01_SD_WP
-    00 [0] PA_00_TP54
+    03 [0] PA_03_HSLIDE_CH1_Y
+    02 [0] PA_02_HSLIDE_CH1_X
+    01 [0] PA_01_HSLIDE_CH0_Y
+    00 [0] PA_00_HSLIDE_CH0_X
 */
 
 #define PIOB_DIFSR_INIT (u32)0x00000000
@@ -1780,31 +1778,31 @@ Initial output values are stored here.
     23 [0] PB_23_ANT_MRDY
     22 [0] PB_22_ANT_USPI2_CS
     21 [0] PB_21_ANT_RESET
-    20 [0] PB_20_LED_RED
+    20 [0] PB_20_LED0_RED
 
-    19 [0] PB_19_LED_GRN
-    18 [0] PB_18_LED_BLU
-    17 [0] PB_17_LED_YLW
-    16 [0] PB_16_LED_CYN
+    19 [0] PB_19_LED2_RED
+    18 [0] PB_18_LED3_RED
+    17 [0] PB_17_LED1_RED
+    16 [0] PB_16_LCD_RD
 
-    15 [0] PB_15_LED_ORG
-    14 [0] PB_14_LED_PRP
-    13 [0] PB_13_LED_WHT
-    12 [0] PB_12_LCD_BL_BLU
+    15 [0] PB_15_LCD_A0
+    14 [0] PB_14_LCD_RST
+    13 [0] PB_13_LED1_BLU
+    12 [0] PB_12_LCD_CS
 
-    11 [0] PB_11_LCD_BL_GRN
-    10 [0] PB_10_LCD_BL_RED
-    09 [0] PB_09_LCD_RST
-    08 [0] PB_08_TP62
+    11 [0] PB_11_VSLIDE_CH2_Y
+    10 [0] PB_10_VSLIDE_CH2_X
+    09 [0] PB_09_VSLIDE_CH1_Y
+    08 [0] PB_08_VSLIDE_CH1_X
 
-    07 [0] PB_07_TP60
-    06 [0] PB_06_TP58
-    05 [0] PB_05_TP56
+    07 [0] PB_07_VSLIDE_CH0_Y
+    06 [0] PB_06_VSLIDE_CH0_X
+    05 [0] PB_05_LCD_BL
     04 [0] PB_04_BLADE_AN1
 
     03 [0] PB_03_BLADE_AN0
-    02 [0] PB_02_BUTTON3
-    01 [0] PB_01_BUTTON2
+    02 [0] PB_02_LED1_GRN
+    01 [0] PB_01_LED0_BLU
     00 [0] PB_00_BUTTON1
 */
 
@@ -1865,27 +1863,27 @@ Tdiv_slclk = 2*(DIV+1)*Tslow_clock.
 0: No effect
 1: Enables writing PIO_ODSR for the I/O line.
 */
-#define PIOA_OWER_INIT (u32)0xB4010000
+#define PIOA_OWER_INIT (u32)0xB40101FF
 /* 
     31 [1] PA_31_HEARTBEAT write enabled
-    30 [0] PA_30_AN_DEMO
-    29 [1] PA_29_BUZZER2 write enabled
-    28 [1] PA_28_BUZZER1 write enabled
+    30 [0] PA_30_TP44
+    29 [1] PA_29_LED0_GRN write enabled
+    28 [1] PA_28_BUZZER write enabled
 
     27 [0] PA_27_CLOCK_OUT
-    26 [1] PA_26_ANT_PWR_EN write enabled
+    26 [0] PA_26_LED2_GRN 
     25 [0] PA_25_ANT_USPI2_SCK
-    24 [0] PA_24_SD_USPI1_SCK
+    24 [0] PA_24_LCD_USPI1_SCK
 
     23 [0] PA_23_ANT_USPI2_MOSI
     22 [0] PA_22_ANT_USPI2_MISO
-    21 [0] PA_21_SD_USPI1_MISO
-    20 [0] PA_20_SD_USPI1_MOSI
+    21 [0] PA_21_TP57
+    20 [0] PA_20_LCD_USPI1_MOSI
 
     19 [0] PA_19_DEBUG_U0_PIMO
     18 [0] PA_18_DEBUG_U0_POMI
     17 [0] PA_17_BUTTON0
-    16 [1] PA_16_BLADE_CS write enabled
+    16 [1] PA_16_BLADE_CSC
 
     15 [0] PA_15_BLADE_SCK
     14 [0] PA_14_BLADE_MOSI
@@ -1895,20 +1893,20 @@ Tdiv_slclk = 2*(DIV+1)*Tslow_clock.
     11 [0] PA_11_BLADE_UPIMO
     10 [0] PA_10_I2C_SCL
     09 [0] PA_09_I2C_SDA
-    08 [0] PA_08_SD_CS_MCDA3
+    08 [1] PA_08_LED3_BLU write enabled
 
-    07 [0] PA_07_HSMCI_MCDA2
-    06 [0] PA_06_HSMCI_MCDA1
-    05 [0] PA_05_HSMCI_MCDA0
-    04 [0] PA_04_HSMCI_MCCDA
+    07 [1] PA_07_LED3_GRN write enabled
+    06 [1] PA_06_LED2_BLU write enabled
+    05 [1] PA_05_HSLIDE_CH2_Y write enabled
+    04 [1] PA_04_HSLIDE_CH2_X write enabled
 
-    03 [0] PA_03_HSMCI_MCCK
-    02 [0] PA_02_SD_DETECT
-    01 [0] PA_01_SD_WP
-    00 [0] PA_00_TP54
+    03 [1] PA_03_HSLIDE_CH1_Y write enabled
+    02 [1] PA_02_HSLIDE_CH1_X write enabled
+    01 [1] PA_01_HSLIDE_CH0_Y write enabled
+    00 [1] PA_00_HSLIDE_CH0_X write enabled
 */
 
-#define PIOB_OWER_INIT (u32)0x01FFFE0
+#define PIOB_OWER_INIT (u32)0x01FFFE6
 /*
     31 [0] PB_31_
     30 [0] PB_30_
@@ -1923,31 +1921,31 @@ Tdiv_slclk = 2*(DIV+1)*Tslow_clock.
     23 [1] PB_23_ANT_MRDY write enabled
     22 [1] PB_22_ANT_USPI2_CS write enabled
     21 [1] PB_21_ANT_RESET write enabled
-    20 [1] PB_20_LED_RED write enabled
+    20 [1] PB_20_LED0_RED write enabled
 
-    19 [1] PB_19_LED_GRN write enabled
-    18 [1] PB_18_LED_BLU write enabled
-    17 [1] PB_17_LED_YLW write enabled
-    16 [1] PB_16_LED_CYN write enabled
+    19 [1] PB_19_LED2_RED write enabled
+    18 [1] PB_18_LED3_RED write enabled
+    17 [1] PB_17_LED1_RED write enabled
+    16 [1] PB_16_LCD_RD write enabled
 
-    15 [1] PB_15_LED_ORG write enabled
-    14 [1] PB_14_LED_PRP write enabled
-    13 [1] PB_13_LED_WHT write enabled
-    12 [1] PB_12_LCD_BL_BLU write enabled
+    15 [1] PB_15_LCD_A0 write enabled
+    14 [1] PB_14_LCD_RST write enabled
+    13 [1] PB_13_LED1_BLU write enabled 
+    12 [1] PB_12_LCD_CS write enabled
 
-    11 [1] PB_11_LCD_BL_GRN write enabled
-    10 [1] PB_10_LCD_BL_RED write enabled
-    09 [1] PB_09_LCD_RST write enabled
-    08 [0] PB_08_TP62
+    11 [1] PB_11_VSLIDE_CH2_Y write enabled
+    10 [1] PB_10_VSLIDE_CH2_X write enabled
+    09 [1] PB_09_VSLIDE_CH1_Y write enabled
+    08 [1] PB_08_VSLIDE_CH1_X write enabled
 
-    07 [0] PB_07_TP60
-    06 [0] PB_06_TP58
-    05 [0] PB_05_TP56
+    07 [1] PB_07_VSLIDE_CH0_Y write enabled
+    06 [1] PB_06_VSLIDE_CH0_X write enabled
+    05 [1] PB_05_LCD_BL write enabled
     04 [0] PB_04_BLADE_AN1
 
     03 [0] PB_03_BLADE_AN0
-    02 [0] PB_02_BUTTON3
-    01 [0] PB_01_BUTTON2
+    02 [1] PB_02_LED1_GRN write enabled
+    01 [1] PB_01_LED0_BLU write enabled
     00 [0] PB_00_BUTTON1
 */
 
@@ -1959,19 +1957,19 @@ For now, don't worry about explictly disabling any write capability.
 #define PIOA_OWDR_INIT (u32)0x000000000
 /* 
     31 [0] PA_31_HEARTBEAT
-    30 [0] PA_30_AN_DEMO
-    29 [0] PA_29_BUZZER2
-    28 [0] PA_28_BUZZER1
+    30 [0] PA_30_TP44
+    29 [0] PA_29_LED0_GRN
+    28 [0] PA_28_BUZZER
 
     27 [0] PA_27_CLOCK_OUT
-    26 [0] PA_26_ANT_PWR_EN
+    26 [0] PA_26_LED2_GRN
     25 [0] PA_25_ANT_USPI2_SCK
-    24 [0] PA_24_SD_USPI1_SCK
+    24 [0] PA_24_LCD_USPI1_SCK
 
     23 [0] PA_23_ANT_USPI2_MOSI
     22 [0] PA_22_ANT_USPI2_MISO
-    21 [0] PA_21_SD_USPI1_MISO
-    20 [0] PA_20_SD_USPI1_MOSI
+    21 [0] PA_21_TP57
+    20 [0] PA_20_LCD_USPI1_MOSI
 
     19 [0] PA_19_DEBUG_U0_PIMO
     18 [0] PA_18_DEBUG_U0_POMI
@@ -1986,17 +1984,17 @@ For now, don't worry about explictly disabling any write capability.
     11 [0] PA_11_BLADE_UPIMO
     10 [0] PA_10_I2C_SCL
     09 [0] PA_09_I2C_SDA
-    08 [0] PA_08_SD_CS_MCDA3
+    08 [0] PA_08_LED3_BLU
 
-    07 [0] PA_07_HSMCI_MCDA2
-    06 [0] PA_06_HSMCI_MCDA1
-    05 [0] PA_05_HSMCI_MCDA0
-    04 [0] PA_04_HSMCI_MCCDA
+    07 [0] PA_07_LED3_GRN
+    06 [0] PA_06_LED2_BLU
+    05 [0] PA_05_HSLIDE_CH2_Y
+    04 [0] PA_04_HSLIDE_CH2_X
 
-    03 [0] PA_03_HSMCI_MCCK
-    02 [0] PA_02_SD_DETECT
-    01 [0] PA_01_SD_WP
-    00 [0] PA_00_TP54
+    03 [0] PA_03_HSLIDE_CH1_Y
+    02 [0] PA_02_HSLIDE_CH1_X
+    01 [0] PA_01_HSLIDE_CH0_Y
+    00 [0] PA_00_HSLIDE_CH0_X
 */
 
 #define PIOB_OWDR_INIT (u32)0x00000000
@@ -2014,31 +2012,31 @@ For now, don't worry about explictly disabling any write capability.
     23 [0] PB_23_ANT_MRDY
     22 [0] PB_22_ANT_USPI2_CS
     21 [0] PB_21_ANT_RESET
-    20 [0] PB_20_LED_RED
+    20 [0] PB_20_LED0_RED
 
-    19 [0] PB_19_LED_GRN
-    18 [0] PB_18_LED_BLU
-    17 [0] PB_17_LED_YLW
-    16 [0] PB_16_LED_CYN
+    19 [0] PB_19_LED2_RED
+    18 [0] PB_18_LED3_RED
+    17 [0] PB_17_LED1_RED
+    16 [0] PB_16_LCD_RD
 
-    15 [0] PB_15_LED_ORG
-    14 [0] PB_14_LED_PRP
-    13 [0] PB_13_LED_WHT
-    12 [0] PB_12_LCD_BL_BLU
+    15 [0] PB_15_LCD_A0
+    14 [0] PB_14_LCD_RST
+    13 [0] PB_13_LED1_BLU
+    12 [0] PB_12_LCD_CS
 
-    11 [0] PB_11_LCD_BL_GRN
-    10 [0] PB_10_LCD_BL_RED
-    09 [0] PB_09_LCD_RST
-    08 [0] PB_08_TP62
+    11 [0] PB_11_VSLIDE_CH2_Y
+    10 [0] PB_10_VSLIDE_CH2_X
+    09 [0] PB_09_VSLIDE_CH1_Y
+    08 [0] PB_08_VSLIDE_CH1_X
 
-    07 [0] PB_07_TP60
-    06 [0] PB_06_TP58
-    05 [0] PB_05_TP56
+    07 [0] PB_07_VSLIDE_CH0_Y
+    06 [0] PB_06_VSLIDE_CH0_X
+    05 [0] PB_05_LCD_BL
     04 [0] PB_04_BLADE_AN1
 
     03 [0] PB_03_BLADE_AN0
-    02 [0] PB_02_BUTTON3
-    01 [0] PB_01_BUTTON2
+    02 [0] PB_02_LED1_GRN
+    01 [0] PB_01_LED0_BLU
     00 [0] PB_00_BUTTON1
 */
 
@@ -2061,7 +2059,6 @@ We don't want to lock access to the GPIO registers anyway, so we won't use this 
     01 [0] "
     00 [0] WPEN
 */
-
 
 /***********************************************************************************************************************
 $$$$$ PWM setup values
@@ -2110,13 +2107,13 @@ $$$$$ PWM setup values
 */
 
 
-#define PWM_ENA_INIT (u32)0x00000003
+#define PWM_ENA_INIT (u32)0x00000001
 /*
     31 - 4 [0] Reserved
 
     03 [0] Channel 3 not enabled
     02 [0] Channel 2 not enabled
-    01 [1] Channel 1 enabled
+    01 [0] Channel 1 not enabled
     00 [1] Channel 0 enabled
 */
 
@@ -2279,4 +2276,12 @@ In general, the period is 6000000 / frequency and duty is always period / 2.
 */
 
 
-#endif /* _MPGL1 */
+
+
+#endif /* _MPGL2 */
+
+
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* End of File */
+/*--------------------------------------------------------------------------------------------------------------------*/
