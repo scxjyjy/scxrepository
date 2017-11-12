@@ -208,18 +208,7 @@ static void UserAppSM_Idle(void)
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
     {
       /* We got some data: parse it into au8DataContent[] */
-      
-     
-        au8TestMessage[3]++;
-        if(au8TestMessage[3] == 0)
-        {
-          au8TestMessage[2]++;
-          if(au8TestMessage[2] == 0)
-          {
-            au8TestMessage[1]++;
-          }
-        }
-    
+   
       /*for(u8 i = 0; i < ANT_DATA_BYTES; i++)
       {
         au8DataContent[2 * i]     = HexToASCIICharUpper(G_au8AntApiCurrentData[i] / 16);
@@ -246,7 +235,7 @@ static void UserAppSM_Idle(void)
           au8TestMessage[5]++;
         }
       }
-      
+      /*count the missed msg*/
       if(G_au8AntApiCurrentData[ANT_TICK_MSG_EVENT_CODE_INDEX]==EVENT_TRANSFER_TX_FAILED )
       {
         au8TestMessage[3]++;
@@ -260,6 +249,7 @@ static void UserAppSM_Idle(void)
         }
       }
       AntQueueAcknowledgedMessage(au8TestMessage);
+      /*show in LCD*/
       for(u8 i = 0; i < ANT_DATA_BYTES; i++)
       {
         au8MsgTemp[2 * i]     = HexToASCIICharUpper(au8TestMessage[i] / 16);
