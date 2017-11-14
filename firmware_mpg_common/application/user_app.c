@@ -175,7 +175,7 @@ OFF  WHITE
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
- if((AT91C_BASE_PIOA->PIO_PDSR&0x00020000)==0x00020000)
+ if((AT91C_BASE_PIOA->PIO_PDSR&0x00008000)==0x00008000)
  {
    AT91C_BASE_PIOB->PIO_CODR|=0x00100000;
  }
