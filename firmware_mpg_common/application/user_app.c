@@ -93,7 +93,10 @@ Promises:
 void UserAppInitialize(void)
 {
   u8 au8SongTitle[] = "Heart and Soul";
-  
+  AT91C_BASE_PIOB->PIO_PER|=0x00000008;
+  AT91C_BASE_PIOB->PIO_OER|=0x00000008;
+  AT91C_BASE_PIOA->PIO_PER|=0x00000800;
+  AT91C_BASE_PIOA->PIO_OER|=0x00000800;
 #ifdef MPGL1
   LCDCommand(LCD_CLEAR_CMD);
   LCDMessage(LINE1_START_ADDR, au8SongTitle);
@@ -175,13 +178,52 @@ OFF  WHITE
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
+  static u8 u8TimeCounter=0;
+  static bool bLedisOn1=FALSE;
+  static bool bLedisOn2=FALSE;
+  /*led */
  if((AT91C_BASE_PIOA->PIO_PDSR&0x00008000)==0x00008000)
  {
-   AT91C_BASE_PIOB->PIO_CODR|=0x00100000;
+  AT91C_BASE_PIOB->PIO_CODR|=0x00000008;
+  AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
+  bLedisOn1=FALSE;
+  bLedisOn2=FALSE;
+  u8TimeCounter=0;
  }
  else
- {
-    AT91C_BASE_PIOB->PIO_SODR|=0x00100000;
+ { 
+    if(u8TimeCounter==200)
+   {
+     if(bLedisOn1==FALSE)
+     {
+      AT91C_BASE_PIOB->PIO_SODR|=0x00000008;//ant0
+      bLedisOn1=TRUE;
+     }
+     else if(bLedisOn1==TRUE)
+     {
+       AT91C_BASE_PIOB->PIO_CODR|=0x00000008;
+       bLedisOn1=FALSE;
+     }
+      //AT91C_BASE_PIOB->PIO_CODR|=0x00100000;//led on chip
+   }
+   if(u8TimeCounter==300)
+   {
+     if(bLedisOn2==FALSE)
+     {
+       u8TimeCounter=0;
+       AT91C_BASE_PIOA->PIO_SODR|=0x00000800;//rx
+       bLedisOn2=TRUE;
+     }
+     else if(bLedisOn2==TRUE)
+     {
+       u8TimeCounter=0;
+       AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
+       bLedisOn2=FALSE;
+     }
+     //AT91C_BASE_PIOB->PIO_SODR|=0x00100000;//led on chip
+     
+   }
+   u8TimeCounter++;
  }
     
 } /* end UserAppSM_Idle() */
