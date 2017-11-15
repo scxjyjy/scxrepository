@@ -181,12 +181,13 @@ static void UserAppSM_Idle(void)
   static u16 u16TimeCounter=0;
   static bool bLedisOn1=FALSE;
   static bool bLedisOn2=FALSE;
+  static bool bBuzzerisOn=FALSE;
    /******************************************************************************
   Description:Numbered musical notation
   musical name:Happy birthday to you!
   */
-  u16 u16noteBuzzer1[]={C4,C4,D4,C4,F4,E4,C4,C4,D4,C4,G5,F5,C4,C4,C3,A5,F5,E4,D5,B4,B5,A5,F5,G5,A5,C5,C5,B4};
-  u16 u16lengthBuzzer1[]={EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,QN,QN,EN,EN,QN,QN,QN,HN,EN,EN,HN};
+  u16 u16noteBuzzer1[]={NO,C4,C4,D4,C4,F4,E4,C4,C4,D4,C4,G5,F5,C4,C4,C3,A5,F5,E4,D5,B4,B5,A5,F5,G5,A5,C5,C5,B4};
+  u16 u16lengthBuzzer1[]={FN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,QN,QN,EN,EN,QN,QN,QN,HN,EN,EN,HN};
   static u8 i=0;//use for the move of note
   /*****************************************************************************
   Description:when the sck input a low level, the leds will blink with the music 
@@ -194,23 +195,34 @@ static void UserAppSM_Idle(void)
  if((AT91C_BASE_PIOA->PIO_PDSR&0x00008000)==0x00008000)
  {
    /*close the led*/
-  AT91C_BASE_PIOB->PIO_CODR|=0x00000008;
-  AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
+  if((AT91C_BASE_PIOB->PIO_CODR!=0x00000008)||
+  (AT91C_BASE_PIOB->PIO_CODR!=0x00000800))
+  {
+    AT91C_BASE_PIOB->PIO_CODR|=0x00000008;
+    AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
+  }
   /*change the corresponding variables*/
-  bLedisOn1=FALSE;
-  bLedisOn2=FALSE;
-  u16TimeCounter=0;
+  if((bLedisOn1!=FALSE)||(bLedisOn2!=FALSE)||
+  (u16TimeCounter!=0))
+  {
+    bLedisOn1=FALSE;
+    bLedisOn2=FALSE;
+    u16TimeCounter=0;
+  }
  }
  else
  { 
-    PWMAudioSetFrequency(BUZZER1,u16noteBuzzer1[i]);
-    PWMAudioOn(BUZZER1);
+    if(bBuzzerisOn==FALSE)
+    {
+      PWMAudioOn(BUZZER1);
+    }
 /*****************************************************************************
   Description:when the time is up blink the led and play the next note
 */
     if(u16TimeCounter==u16lengthBuzzer1[i])
     {
       i++;
+      PWMAudioSetFrequency(BUZZER1,u16noteBuzzer1[i]);
       u16TimeCounter=0;
      if(bLedisOn1==FALSE)
      {
@@ -241,13 +253,13 @@ static void UserAppSM_Idle(void)
        bLedisOn2=FALSE;
      }
    }
-   
-  u16TimeCounter++;
-  /*close the music */
+  /*if music play to end , close the music */
   if(i>sizeof(u16lengthBuzzer1))
   {
     PWMAudioOff(BUZZER1);
+    bBuzzerisOn=FALSE;
   }
+  u16TimeCounter++;
  }
     
 } /* end UserAppSM_Idle() */
