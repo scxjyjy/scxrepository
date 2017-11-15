@@ -178,22 +178,40 @@ OFF  WHITE
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
-  static u8 u8TimeCounter=0;
+  static u16 u16TimeCounter=0;
   static bool bLedisOn1=FALSE;
   static bool bLedisOn2=FALSE;
-  /*led */
+   /******************************************************************************
+  Description:Numbered musical notation
+  musical name:Happy birthday to you!
+  */
+  u16 u16noteBuzzer1[]={C4,C4,D4,C4,F4,E4,C4,C4,D4,C4,G5,F5,C4,C4,C3,A5,F5,E4,D5,B4,B5,A5,F5,G5,A5,C5,C5,B4};
+  u16 u16lengthBuzzer1[]={EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,QN,QN,EN,EN,QN,QN,QN,HN,EN,EN,HN};
+  static u8 i=0;//use for the move of note
+  /*****************************************************************************
+  Description:when the sck input a low level, the leds will blink with the music 
+  */
  if((AT91C_BASE_PIOA->PIO_PDSR&0x00008000)==0x00008000)
  {
+   /*close the led*/
   AT91C_BASE_PIOB->PIO_CODR|=0x00000008;
   AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
+  /*change the corresponding variables*/
   bLedisOn1=FALSE;
   bLedisOn2=FALSE;
-  u8TimeCounter=0;
+  u16TimeCounter=0;
  }
  else
  { 
-    if(u8TimeCounter==200)
-   {
+    PWMAudioSetFrequency(BUZZER1,u16noteBuzzer1[i]);
+    PWMAudioOn(BUZZER1);
+/*****************************************************************************
+  Description:when the time is up blink the led and play the next note
+*/
+    if(u16TimeCounter==u16lengthBuzzer1[i])
+    {
+      i++;
+      u16TimeCounter=0;
      if(bLedisOn1==FALSE)
      {
       AT91C_BASE_PIOB->PIO_SODR|=0x00000008;//ant0
@@ -204,26 +222,32 @@ static void UserAppSM_Idle(void)
        AT91C_BASE_PIOB->PIO_CODR|=0x00000008;
        bLedisOn1=FALSE;
      }
-      //AT91C_BASE_PIOB->PIO_CODR|=0x00100000;//led on chip
    }
-   if(u8TimeCounter==300)
+ /*****************************************************************************
+  Description:blink the other led when time is up t0 200ms
+*/  
+   if(u16TimeCounter==200)
    {
      if(bLedisOn2==FALSE)
      {
-       u8TimeCounter=0;
+       //u16TimeCounter=0;
        AT91C_BASE_PIOA->PIO_SODR|=0x00000800;//rx
        bLedisOn2=TRUE;
      }
      else if(bLedisOn2==TRUE)
      {
-       u8TimeCounter=0;
+       //u8TimeCounter=0;
        AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
        bLedisOn2=FALSE;
      }
-     //AT91C_BASE_PIOB->PIO_SODR|=0x00100000;//led on chip
-     
    }
-   u8TimeCounter++;
+   
+  u16TimeCounter++;
+  /*close the music */
+  if(i>sizeof(u16lengthBuzzer1))
+  {
+    PWMAudioOff(BUZZER1);
+  }
  }
     
 } /* end UserAppSM_Idle() */
