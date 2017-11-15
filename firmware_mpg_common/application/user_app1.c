@@ -137,25 +137,33 @@ static void UserApp1SM_Idle(void)
 {
   static u16 u16TimeCounter=0;
   static u16 i=0;
+  static bool bBuzzerisOn=FALSE;
   /*茉莉花*/
  // u16 u16noteBuzzer1[]={NO,E4,E4,G4,D4,E5,E5,D4,G4,G4,A4,G4,E4,E4,G4,D4,E5,E5,D4,G4,G4,A4,G4,E4,G4,G4,G4,E4,G4,
   //E4,A4S,E4,D4,E4,B4,G4S,F4S,G4S,G4S,A4S,G4S};
   //u16 u16lengthBuzzer1[]={FN,QN,EN,EN,EN,EN,EN,EN,QN,EN,EN,HN,QN,EN,EN,EN,EN,EN,EN,QN,EN,EN,HN,QN,QN,QN,EN,EN,QN,
   //QN,HN,QN,EN,EN,QN,EN,EN,QN,EN,EN,HN};
-  u16 u16noteBuzzer1[]={C4,C4,D4,C4,F4,E4,C4,C4,D4,C4,G5,F5,C4,C4,C3,A5,F5,E4,D5,B4,B5,A5,F5,G5,A5,C5,C5,B4};
-  u16 u16lengthBuzzer1[]={EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,QN,QN,EN,EN,QN,QN,QN,HN,EN,EN,HN};
-  PWMAudioSetFrequency(BUZZER1,u16noteBuzzer1[i]);
-  PWMAudioOn(BUZZER1);
+  u16 u16noteBuzzer1[]={NO,C4,C4,D4,C4,F4,E4,C4,C4,D4,C4,G5,F5,C4,C4,C3,A5,F5,E4,D5,B4,B5,A5,F5,G5,A5,C5,C5,B4};
+  u16 u16lengthBuzzer1[]={FN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,QN,QN,EN,EN,QN,QN,QN,HN,EN,EN,HN};
+/*不完整以下代码，需要加个if来进入不然会出现一直响*/
+  if(bBuzzerisOn==FALSE)
+  {
+    PWMAudioOn(BUZZER1);
+    bBuzzerisOn=TRUE;
+  }
   u16TimeCounter++;
   if(u16TimeCounter==u16lengthBuzzer1[i])
   {
+    PWMAudioSetFrequency(BUZZER1,u16noteBuzzer1[i]);
     i++;
     u16TimeCounter=0;
   }
   if(i>sizeof(u16lengthBuzzer1))
   {
     PWMAudioOff(BUZZER1);
+    bBuzzerisOn=FALSE;
   }
+ 
   
 } /* end UserApp1SM_Idle() */
                       
