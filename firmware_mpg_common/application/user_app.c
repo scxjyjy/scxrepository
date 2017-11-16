@@ -178,7 +178,7 @@ OFF  WHITE
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
-  static u8 u8TimeCounter=0;
+  static u16 u16TimeCounter=0;
   static bool bLedisOn1=FALSE;
   static bool bLedisOn2=FALSE;
   /*led */
@@ -188,11 +188,11 @@ static void UserAppSM_Idle(void)
   AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
   bLedisOn1=FALSE;
   bLedisOn2=FALSE;
-  u8TimeCounter=0;
+  u16TimeCounter=0;
  }
  else
  { 
-    if(u8TimeCounter==200)
+    if(u16TimeCounter==200)
    {
      if(bLedisOn1==FALSE)
      {
@@ -206,24 +206,24 @@ static void UserAppSM_Idle(void)
      }
       //AT91C_BASE_PIOB->PIO_CODR|=0x00100000;//led on chip
    }
-   if(u8TimeCounter==300)
+   if(u16TimeCounter==300)
    {
      if(bLedisOn2==FALSE)
      {
-       u8TimeCounter=0;
+       u16TimeCounter=0;
        AT91C_BASE_PIOA->PIO_SODR|=0x00000800;//rx
        bLedisOn2=TRUE;
      }
      else if(bLedisOn2==TRUE)
      {
-       u8TimeCounter=0;
-       AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
+       u16TimeCounter=0;
+       AT91C_BASE_PIOA->PIO_CODR|=0x00000800;
        bLedisOn2=FALSE;
      }
      //AT91C_BASE_PIOB->PIO_SODR|=0x00100000;//led on chip
      
    }
-   u8TimeCounter++;
+   u16TimeCounter++;
  }
     
 } /* end UserAppSM_Idle() */
