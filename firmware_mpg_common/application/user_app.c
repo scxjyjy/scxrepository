@@ -92,7 +92,8 @@ Promises:
 */
 void UserAppInitialize(void)
 {
-  u8 au8SongTitle[] = "Heart and Soul";
+  u8 au8SongTitle[] = "Happy birthday to yo";
+  u8 au8SongTitle1[]={'u','!','/0'};
   AT91C_BASE_PIOB->PIO_PER|=0x00000008;
   AT91C_BASE_PIOB->PIO_OER|=0x00000008;
   AT91C_BASE_PIOA->PIO_PER|=0x00000800;
@@ -100,6 +101,7 @@ void UserAppInitialize(void)
 #ifdef MPGL1
   LCDCommand(LCD_CLEAR_CMD);
   LCDMessage(LINE1_START_ADDR, au8SongTitle);
+  LCDMessage(LINE2_START_ADDR, au8SongTitle1);
 #endif /* MPGL1 */
 
 #ifdef MPG2
@@ -187,7 +189,7 @@ static void UserAppSM_Idle(void)
   musical name:Happy birthday to you!
   */
   u16 u16noteBuzzer1[]={NO,C4,C4,D4,C4,F4,E4,C4,C4,D4,C4,G5,F5,C4,C4,C3,A5,F5,E4,D5,B4,B5,A5,F5,G5,A5,C5,C5,B4};
-  u16 u16lengthBuzzer1[]={FN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,QN,QN,EN,EN,QN,QN,QN,HN,EN,EN,HN};
+  u16 u16lengthBuzzer1[]={EN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,QN,QN,EN,EN,QN,QN,QN,HN,EN,EN,HN};
   static u8 i=0;//use for the move of note
   /*****************************************************************************
   Description:when the sck input a low level, the leds will blink with the music 
@@ -196,10 +198,11 @@ static void UserAppSM_Idle(void)
  {
    /*close the led*/
   if((AT91C_BASE_PIOB->PIO_CODR!=0x00000008)||
-  (AT91C_BASE_PIOB->PIO_CODR!=0x00000800))
+  (AT91C_BASE_PIOA->PIO_CODR!=0x00000800))
   {
+    PWMAudioOff(BUZZER1);
     AT91C_BASE_PIOB->PIO_CODR|=0x00000008;
-    AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
+    AT91C_BASE_PIOA->PIO_CODR|=0x00000800;
   }
   /*change the corresponding variables*/
   if((bLedisOn1!=FALSE)||(bLedisOn2!=FALSE)||
@@ -215,6 +218,7 @@ static void UserAppSM_Idle(void)
     if(bBuzzerisOn==FALSE)
     {
       PWMAudioOn(BUZZER1);
+      bBuzzerisOn==TRUE;
     }
 /*****************************************************************************
   Description:when the time is up blink the led and play the next note
@@ -249,15 +253,17 @@ static void UserAppSM_Idle(void)
      else if(bLedisOn2==TRUE)
      {
        //u8TimeCounter=0;
-       AT91C_BASE_PIOB->PIO_CODR|=0x00000800;
+       AT91C_BASE_PIOA->PIO_CODR|=0x00000800;
        bLedisOn2=FALSE;
      }
    }
   /*if music play to end , close the music */
-  if(i>sizeof(u16lengthBuzzer1))
+  if(i==sizeof(u16noteBuzzer1))
   {
     PWMAudioOff(BUZZER1);
     bBuzzerisOn=FALSE;
+    u16TimeCounter=0;
+    i=0;//back to musical start
   }
   u16TimeCounter++;
  }
