@@ -92,8 +92,7 @@ Promises:
 */
 void UserAppInitialize(void)
 {
-  u8 au8SongTitle[] = "Happy birthday to yo";
-  u8 au8SongTitle1[]={'u','!','/0'};
+  u8 au8SongTitle[] = "Happy birthday !";
   AT91C_BASE_PIOB->PIO_PER|=0x00000008;
   AT91C_BASE_PIOB->PIO_OER|=0x00000008;
   AT91C_BASE_PIOA->PIO_PER|=0x00000800;
@@ -101,7 +100,6 @@ void UserAppInitialize(void)
 #ifdef MPGL1
   LCDCommand(LCD_CLEAR_CMD);
   LCDMessage(LINE1_START_ADDR, au8SongTitle);
-  LCDMessage(LINE2_START_ADDR, au8SongTitle1);
 #endif /* MPGL1 */
 
 #ifdef MPG2
@@ -191,16 +189,19 @@ static void UserAppSM_Idle(void)
   u16 u16noteBuzzer1[]={NO,C4,C4,D4,C4,F4,E4,C4,C4,D4,C4,G5,F5,C4,C4,C3,A5,F5,E4,D5,B4,B5,A5,F5,G5,A5,C5,C5,B4};
   u16 u16lengthBuzzer1[]={EN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,HN,EN,EN,QN,QN,QN,QN,QN,EN,EN,QN,QN,QN,HN,EN,EN,HN};
   static u8 i=0;//use for the move of note
+  static u8 a=sizeof(u16noteBuzzer1);
   /*****************************************************************************
   Description:when the sck input a low level, the leds will blink with the music 
   */
  if((AT91C_BASE_PIOA->PIO_PDSR&0x00008000)==0x00008000)
  {
+   LedOn(RED);
    /*close the led*/
+  // a=sizeof(u16noteBuzzer1);
+  PWMAudioOff(BUZZER1);
   if((AT91C_BASE_PIOB->PIO_CODR!=0x00000008)||
   (AT91C_BASE_PIOA->PIO_CODR!=0x00000800))
   {
-    PWMAudioOff(BUZZER1);
     AT91C_BASE_PIOB->PIO_CODR|=0x00000008;
     AT91C_BASE_PIOA->PIO_CODR|=0x00000800;
   }
@@ -223,6 +224,7 @@ static void UserAppSM_Idle(void)
 /*****************************************************************************
   Description:when the time is up blink the led and play the next note
 */
+    LedOff(RED);
     if(u16TimeCounter==u16lengthBuzzer1[i])
     {
       i++;
@@ -258,7 +260,7 @@ static void UserAppSM_Idle(void)
      }
    }
   /*if music play to end , close the music */
-  if(i==sizeof(u16noteBuzzer1))
+  if(i>=((sizeof(u16noteBuzzer1)/2)-1))
   {
     PWMAudioOff(BUZZER1);
     bBuzzerisOn=FALSE;
