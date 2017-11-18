@@ -85,7 +85,9 @@ static u8 UserApp1_au8MasterName[9]   = "0\0\0\0\0\0\0\0";
 static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dbm  S:-xx dbm";
 static u8 u8Distance=0;
 static u8 UserApp1_au8LcdInformationMessage1[] = "Distance:x m";
-
+static u16 u16musicalnote[]={C4,D4,E4,F4,G4,A4,B4,C5};
+static bool bBuzzerisOn=FALSE;
+static u8 INDEX=0;
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -499,7 +501,7 @@ static void UserApp1SM_RadioActive(void)
     {
       u8Distance=8;
     }
-    if(u8Distance<0)
+    if(u8Distance<=0)
     {
       u8Distance=0;
     }
@@ -509,19 +511,43 @@ static void UserApp1SM_RadioActive(void)
       if(s8StrongestRssi > as8dBmLevels[i])
       {
         LedOn(aeLedDisplayLevels[i]);
-        LCDCommand(LCD_CLEAR_CMD);
-        u8Distance++;
-        AntGetdBmAscii(u8Distance,&UserApp1_au8LcdInformationMessage1[9]);
-        LCDMessage(LINE2_START_ADDR, "0");
+     
+       //LCDCommand(LCD_CLEAR_CMD);
+       // u8Distance++;
+       //AntGetdBmAscii(u8Distance,&UserApp1_au8LcdInformationMessage1[9]);
+       // LCDMessage(LINE2_START_ADDR+10, "0");
       }
       else
       {
         LedOff(aeLedDisplayLevels[i]);
-        LCDCommand(LCD_CLEAR_CMD);
-        u8Distance--;
-        AntGetdBmAscii(u8Distance,&UserApp1_au8LcdInformationMessage1[9]);
-        LCDMessage(LINE2_START_ADDR, "0");
+       
+        //LCDCommand(LCD_CLEAR_CMD);
+       //u8Distance--;
+       // AntGetdBmAscii(u8Distance,&UserApp1_au8LcdInformationMessage1[9]);
+       // LCDMessage(LINE2_START_ADDR+10, "0");
       }
+    }
+    if(s8StrongestRssi > DBM_MAX_LEVEL])
+    {
+        PWMAudioSetFrequency(BUZZER1,u16musicalnote[INDEX]);
+        if(bBuzzerisOn==FALSE)
+        {
+          PWMAudioOn(BUZZER1);
+          bBuzzerisOn=TRUE;
+        }
+        INDEX++;
+    }
+    else
+    {
+       if(bBuzzerisOn==TRUE)
+       {
+          PWMAudioOff(BUZZER1);
+          bBuzzerisOn=FALSE;
+       }
+    }
+    if(INDEX>=sizeof(u16musicalnote)/2)
+    {
+      INDEX=0;
     }
     
   } /* end if( AntReadAppMessageBuffer() )*/
