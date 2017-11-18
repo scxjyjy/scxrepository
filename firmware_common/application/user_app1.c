@@ -74,7 +74,7 @@ static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout co
 /* #EIE Task 1
 Enter your name below where it says "YOURNAME"  
 MAXIMUM 8 CHARACTERS:             12345678               */
-static u8 UserApp1_au8MyName[] = "JRLEiE88";
+static u8 UserApp1_au8MyName[] = "Hello!";
 
 static AntAssignChannelInfoType UserApp1_sMasterChannel;
 static AntAssignChannelInfoType UserApp1_sSlaveChannel;
@@ -82,8 +82,9 @@ static AntAssignChannelInfoType UserApp1_sSlaveChannel;
 static u8 UserApp1_au8LcdStartLine1[] = "Hi \0\0\0\0\0\0\0\0";
 static u8 UserApp1_au8LcdStartLine2[] = "Push B0 to search";
 static u8 UserApp1_au8MasterName[9]   = "0\0\0\0\0\0\0\0";
-static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dBm  S:-xx dBm";
-
+static u8 UserApp1_au8LcdInformationMessage[] = "M:-xx dbm  S:-xx dbm";
+static u8 u8Distance=0;
+static u8 UserApp1_au8LcdInformationMessage1[] = "Distance:x m";
 
 /**********************************************************************************************************************
 Function Definitions
@@ -335,7 +336,7 @@ static void UserApp1SM_OpeningChannels(void)
   {
     /* Update LCD and go to main Radio monitoring state */
     LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR, UserApp1_au8LcdInformationMessage);
+    LCDMessage(LINE1_START_ADDR, UserApp1_au8LcdInformationMessage1);
     LCDMessage(LINE2_START_ADDR, UserApp1_au8MasterName);
     
     UserApp1_StateMachine = UserApp1SM_RadioActive;    
@@ -486,7 +487,7 @@ static void UserApp1SM_RadioActive(void)
 
     /* Make sure LCD has the current message - this should happen infrequently
     enough to no cause problems, but if that's untrue this needs to be throttled back */
-    LCDMessage(LINE1_START_ADDR, UserApp1_au8LcdInformationMessage);
+    /////LCDMessage(LINE1_START_ADDR, UserApp1_au8LcdInformationMessage);
     
     /* Update the strongest signal being received */
     s8StrongestRssi = s8RssiChannel0;
@@ -494,17 +495,32 @@ static void UserApp1SM_RadioActive(void)
     {
       s8StrongestRssi = s8RssiChannel1;
     }
-
+    if(u8Distance>8)
+    {
+      u8Distance=8;
+    }
+    if(u8Distance<0)
+    {
+      u8Distance=0;
+    }
     /* Loop through all of the levels to check which LEDs to turn on */
     for(u8 i = 0; i < NUM_DBM_LEVELS; i++)
     {
       if(s8StrongestRssi > as8dBmLevels[i])
       {
         LedOn(aeLedDisplayLevels[i]);
+        LCDCommand(LCD_CLEAR_CMD);
+        u8Distance++;
+        AntGetdBmAscii(u8Distance,&UserApp1_au8LcdInformationMessage1[9]);
+        LCDMessage(LINE2_START_ADDR, "0");
       }
       else
       {
         LedOff(aeLedDisplayLevels[i]);
+        LCDCommand(LCD_CLEAR_CMD);
+        u8Distance--;
+        AntGetdBmAscii(u8Distance,&UserApp1_au8LcdInformationMessage1[9]);
+        LCDMessage(LINE2_START_ADDR, "0");
       }
     }
     
