@@ -1,7 +1,6 @@
 Debug/
-settings/
-*.TMP
 *.dep
-*..bat
-*.wsdt
+*.bat
+*.TMP
 *.wspos
+doxygen/html
