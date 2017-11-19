@@ -368,10 +368,7 @@ static void UserApp1SM_RadioActive(void)
   u8 u8EventCode;
   u8 au8UserName[9];
     
-  static u8 u32MasterMessageCounter = 0;
-  static s8 s8RssiChannel0 = -99;
-  static s8 s8RssiChannel1 = -99;
-  static s8 s8StrongestRssi = -99;
+
 
   /* Monitor ANT messages: looking for any incoming messages
   that indicates a matching device has been located. */
@@ -380,205 +377,18 @@ static void UserApp1SM_RadioActive(void)
     /* Check the message class to determine how to process the message */
     if(G_eAntApiCurrentMessageClass == ANT_TICK)
     {
-      /* Get the EVENT code from the ANT_TICK message */ 
-      u8EventCode = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
       
-      /* Slave devices get different event codes than masters, so handle seperately */
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 0)
-      {
-        switch (u8EventCode)
-        {
-          case EVENT_TX:
-          {
-            /* Keep track of message and update LCD if too many messages have been sent
-            without any being received.  The counter is cleared whenever the Master channel
-            receives a message from the Slave it is trying to talk to. */
-            u32MasterMessageCounter++;
-            if(u32MasterMessageCounter >= ALLOWED_MISSED_MESSAGES)
-            {
-              s8RssiChannel0 = DBM_LEVEL1;
-              LedOff(LCD_RED);
-              UserApp1_au8LcdInformationMessage[INDEX_MASTER_DBM + 1] = 'x';
-              UserApp1_au8LcdInformationMessage[INDEX_MASTER_DBM + 2] = 'x';
-            }
-            break;
-          }
-          default:
-          {
-            DebugPrintf("Master unhandled event\n\n\r");
-            break;
-          }
-        } /* end switch u8EventCode */
-      } /* end if(G_sAntApiCurrentMessageExtData.u8Channel == 0) */
-
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 1)
-      {
-        /* Check the Event code and respond */
-        switch (u8EventCode)
-        {
-          case EVENT_RX_FAIL_GO_TO_SEARCH:
-          {
-            s8RssiChannel1 = DBM_LEVEL1;
-            LedOff(LCD_BLUE);
-            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 1] = 'x';
-            UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM + 2] = 'x';
-            break;
-          }
-          
-          default:
-          {
-            DebugPrintf("Slave unhandled event\n\n\r");
-            break;
-          }
-        } /* end switch u8EventCode */
-      } /* end if(G_sAntApiCurrentMessageExtData.u8Channel == 1) */
     } /* end if(G_eAntApiCurrentMessageClass == ANT_TICK) */
 
     
     /* Check for DATA messages */
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
     {
-      /* Check the channel number and update LED */
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 0)
-      {
-        /* Reset the message counter */
-        u32MasterMessageCounter = 0;
-        
-        /* Channel 0 is red (but don't touch blue or green) */
-        LedOn(LCD_RED);
-        
-        /* Record RSSI level and update LCD message */
-        s8RssiChannel0 = G_sAntApiCurrentMessageExtData.s8RSSI;
-        AntGetdBmAscii(s8RssiChannel0, &UserApp1_au8LcdInformationMessage[INDEX_MASTER_DBM]);
-      }
-      
-      if(G_sAntApiCurrentMessageExtData.u8Channel == 1)
-      {
-        /* When the slave receives a message, queue a response message */
-        AntQueueBroadcastMessage(ANT_CHANNEL_1, UserApp1_au8MasterName);
-
-        /* Channel 1 is Blue (but don't touch red or green) */
-        LedOn(LCD_BLUE);
-
-        /* Record RSSI level and update LCD message */
-        s8RssiChannel1 = G_sAntApiCurrentMessageExtData.s8RSSI;
-        AntGetdBmAscii(s8RssiChannel1, &UserApp1_au8LcdInformationMessage[INDEX_SLAVE_DBM]);
-      }
-                             
-      /* Read and display user name if level is high enough */
-      if(s8StrongestRssi > DBM_MAX_LEVEL)
-      {
-        /* Assume that the format of the name in the DATA message is letters with trailing
-        spaces so we always read 8 characters and don't need to worry about checking. */
-        for(u8 i = 0; i < ANT_DATA_BYTES; i++)
-        {
-          au8UserName[i] = G_au8AntApiCurrentMessageBytes[i];
-        }
-
-        /* Add the NULL and write the name to the LCD */
-        au8UserName[8] = '\0';
-        LCDMessage(ADDRESS_LCD_SLAVE_NAME, au8UserName);
-      }
-      else
-      {
-        /* Otherwise clear the name area */
-        LCDClearChars(ADDRESS_LCD_SLAVE_NAME, 8);
-      }
-      
-    } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
-
-    /* Make sure LCD has the current message - this should happen infrequently
-    enough to no cause problems, but if that's untrue this needs to be throttled back */
-    /////LCDMessage(LINE1_START_ADDR, UserApp1_au8LcdInformationMessage);
-    
-    /* Update the strongest signal being received */
-    s8StrongestRssi = s8RssiChannel0;
-    if(s8RssiChannel1 > s8RssiChannel0)
-    {
-      s8StrongestRssi = s8RssiChannel1;
-    }
-    if(u8Distance>8)
-    {
-      u8Distance=8;
-    }
-    if(u8Distance<=0)
-    {
-      u8Distance=0;
-    }
-    /* Loop through all of the levels to check which LEDs to turn on */
-    for(u8 i = 0; i < NUM_DBM_LEVELS; i++)
-    {
-      if(s8StrongestRssi > as8dBmLevels[i])
-      {
-        LedOn(aeLedDisplayLevels[i]);
      
-       //LCDCommand(LCD_CLEAR_CMD);
-       // u8Distance++;
-       //AntGetdBmAscii(u8Distance,&UserApp1_au8LcdInformationMessage1[9]);
-       // LCDMessage(LINE2_START_ADDR+10, "0");
-      }
-      else
-      {
-        LedOff(aeLedDisplayLevels[i]);
-       
-        //LCDCommand(LCD_CLEAR_CMD);
-       //u8Distance--;
-       // AntGetdBmAscii(u8Distance,&UserApp1_au8LcdInformationMessage1[9]);
-       // LCDMessage(LINE2_START_ADDR+10, "0");
-      }
     }
-    if(s8StrongestRssi > DBM_MAX_LEVEL])
-    {
-        PWMAudioSetFrequency(BUZZER1,u16musicalnote[INDEX]);
-        if(bBuzzerisOn==FALSE)
-        {
-          PWMAudioOn(BUZZER1);
-          bBuzzerisOn=TRUE;
-        }
-        INDEX++;
-    }
-    else
-    {
-       if(bBuzzerisOn==TRUE)
-       {
-          PWMAudioOff(BUZZER1);
-          bBuzzerisOn=FALSE;
-       }
-    }
-    if(INDEX>=sizeof(u16musicalnote)/2)
-    {
-      INDEX=0;
-    }
-    
-  } /* end if( AntReadAppMessageBuffer() )*/
- 
-  
-  /* Watch for button press to turn off radio */
-  if(WasButtonPressed(BUTTON3))
-  {
-    /* Ack the button and turn off LCD backlight */
-    ButtonAcknowledge(BUTTON3);
-    LedOff(LCD_RED);
-    LedOff(LCD_BLUE);
-
-    /* Make sure all LEDs are off */
-    for(u8 i = 0; i < 8; i++)
-    {
-      LedOff(aeLedDisplayLevels[i]);
-    }
-    
-    /* Update LCD back to the starting screen */
-    LCDCommand(LCD_CLEAR_CMD);
-    LCDMessage(LINE1_START_ADDR, UserApp1_au8LcdStartLine1);
-    LCDMessage(LINE2_START_ADDR, UserApp1_au8LcdStartLine2);
-    
-    /* Queue requests to close both channels */
-    AntCloseChannelNumber(ANT_CHANNEL_0);
-    AntCloseChannelNumber(ANT_CHANNEL_1);
-    UserApp1_u32Timeout = G_u32SystemTime1ms;
-    UserApp1_StateMachine = UserApp1SM_ClosingChannels;    
-  }
-
+                        
+     
+    } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
 } /* end UserApp1SM_RadioActive() */
 
 
