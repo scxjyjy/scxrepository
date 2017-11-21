@@ -68,7 +68,7 @@ static u32 UserApp1_u32TickMsgCount = 0;             /* Counts the number of ANT
 
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
-
+static u8 AntNetworkKey[]={0xB9, 0xA5, 0x21, 0xFB, 0xBD, 0x72, 0xC3, 0x45};
 
 /**********************************************************************************************************************
 Function Definitions
@@ -138,7 +138,7 @@ void UserApp1Initialize(void)
   sAntSetupData.AntNetwork = ANT_NETWORK_DEFAULT;
   for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
   {
-    sAntSetupData.AntNetworkKey[i] = ANT_DEFAULT_NETWORK_KEY;
+    sAntSetupData.AntNetworkKey[i] = AntNetworkKey[i];
   }
     
   /* If good initialization, set state to Idle */
