@@ -380,65 +380,15 @@ static void UserApp1SM_ChannelOpen(void)
 #endif /* MPG2 */
 
         /* Update our local message counter and send the message back */
-        au8TestMessage[7]++;
-        if(au8TestMessage[7] == 0)
-        {
-          au8TestMessage[6]++;
-          if(au8TestMessage[6] == 0)
-          {
-            au8TestMessage[5]++;
-          }
-        }
+        au8TestMessage[7]=8;
+        au8TestMessage[6]=0;
+        au8TestMessage[5]=0x0F;
+        
+        
         AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8TestMessage);
 
-        /* Check for a special packet and respond */
-#ifdef MPG1
-        if(G_au8AntApiCurrentMessageBytes[0] == 0xA5)
-        {
-          LedOff(LCD_RED);
-          LedOff(LCD_GREEN);
-          LedOff(LCD_BLUE);
-          
-          if(G_au8AntApiCurrentMessageBytes[1] == 1)
-          {
-            LedOn(LCD_RED);
-          }
-          
-          if(G_au8AntApiCurrentMessageBytes[2] == 1)
-          {
-            LedOn(LCD_GREEN);
-          }
 
-          if(G_au8AntApiCurrentMessageBytes[3] == 1)
-          {
-            LedOn(LCD_BLUE);
-          }
-        }
-#endif /* MPG1 */    
-    
-#ifdef MPG2
-        if(G_au8AntApiCurrentMessageBytes[0] == 0xA5)
-        {
-          LedOff(RED3);
-          LedOff(GREEN3);
-          LedOff(BLUE3);
-          
-          if(G_au8AntApiCurrentMessageBytes[1] == 1)
-          {
-            LedOn(RED3);
-          }
-          
-          if(G_au8AntApiCurrentMessageBytes[2] == 1)
-          {
-            LedOn(GREEN3);
-          }
 
-          if(G_au8AntApiCurrentMessageBytes[3] == 1)
-          {
-            LedOn(BLUE3);
-          }
-        }
-#endif /* MPG2 */
       } /* end if(bGotNewData) */
     } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
     
