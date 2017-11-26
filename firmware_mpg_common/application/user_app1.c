@@ -65,11 +65,15 @@ Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
 static u32 UserApp1_u32DataMsgCount = 0;             /* Counts the number of ANT_DATA packets received */
 static u32 UserApp1_u32TickMsgCount = 0;             /* Counts the number of ANT_TICK packets received */
-
+static DisplayStateType eDisplayState=Empty;
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
 static u8 AntNetworkKey[]={0xB9, 0xA5, 0x21, 0xFB, 0xBD, 0x72, 0xC3, 0x45};
-
+static sLine1Menu sLine1menu;
+static sLine2Menu sLine2menu;
+static u16 u16TimeCounter=0;
+static bool bprompt=FALSE;
+static u8 Uioption=1;//don't change this variable easy
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -98,14 +102,20 @@ Promises:
 void UserApp1Initialize(void)
 {
   u8 au8WelcomeMessage[] = "loading...";
+  sLine1menu.UIoption1_Line1="1.Average rate   <-";
+  sLine1menu.UIoption2_Line1="1.Average rate     ";
+  sLine1menu.UIoption3_Line1="3.History        <-";
+  sLine1menu.UIoption4_Line1="3.History          ";
+  sLine2menu.UIoption1_Line2="2.Max and mini     V";
+  sLine2menu.UIoption2_Line2="2.Max and mini   <-V";
+  sLine2menu.UIoption3_Line2="4.Developer        V";
+  sLine2menu.UIoption4_Line2="4.Developer      <-V";
   AntAssignChannelInfoType sAntSetupData;
   
   /* Clear screen and place start messages */
 #ifdef EIE1
   LCDCommand(LCD_CLEAR_CMD);
-  LCDMessage(LINE1_START_ADDR, au8WelcomeMessage); 
-  /* Start with LED0 in RED state = channel is not configured */
-  LedOn(RED);
+  LCDMessage(LINE1_START_ADDR, au8WelcomeMessage);
 #endif /* EIE1 */ 
  /* Configure ANT for this application */
   sAntSetupData.AntChannel          = ANT_CHANNEL_USERAPP;
@@ -123,7 +133,7 @@ void UserApp1Initialize(void)
   sAntSetupData.AntNetwork = ANT_NETWORK_DEFAULT;
   for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
   {
-    sAntSetupData.AntNetworkKey[i] = AntNetworkKey[i];
+    sAntSetupData.AntNetworkKey[i] = ANT_NETWORK_DEFAULT;
   }
     
   /* If good initialization, set state to channelopen */
@@ -136,9 +146,7 @@ void UserApp1Initialize(void)
   else
   {
     /* The task isn't properly initialized, so shut it down and don't run */
-#ifdef EIE1
-    LedBlink(RED, LED_4HZ);
-#endif /* EIE1 */
+    DebugPrintf("channel1 initialized failed");
     UserApp1_StateMachine = UserApp1SM_Error;
   }
 
@@ -162,7 +170,6 @@ Promises:
 void UserApp1RunActiveState(void)
 {
   UserApp1_StateMachine();
-
 } /* end UserApp1RunActiveState */
 
 
@@ -182,10 +189,7 @@ static void UserApp1SM_WaitChannelAssign(void)
   /* Check if the channel assignment is complete */
   if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_CONFIGURED)
   {
-#ifdef EIE1
-    LedOff(RED);
-    LedOn(YELLOW);
-#endif /* EIE1 */
+    DebugPrintf("channel1 assign successfully");
     AntOpenChannelNumber(ANT_CHANNEL_USERAPP);
     UserApp1_u32Timeout = G_u32SystemTime1ms;
     UserApp1_StateMachine = UserApp1SM_WaitChannelOpen;
@@ -203,9 +207,95 @@ static void UserApp1SM_WaitChannelAssign(void)
 
   /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for a message to be queued */
-static void UserApp1SM_Idle(void)
+static void UserApp1SM_DisplayIdle(void)
 {
-    
+   static u8 au8CommandF1Message[]={0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+   static u8 au8CommandF2Message[]={0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+   static u8 au8CommandF3Message[]={0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+   static u8 au8CommandF4Message[]={0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  if( AntReadAppMessageBuffer() )
+  {
+     /* New data message: check what it is */
+    if(G_eAntApiCurrentMessageClass == ANT_DATA)
+    {
+      eDisplayState=JudgeDisplayState();
+      switch(eDisplayState)
+      {
+        case Feature1:
+          LCDCommand(LCD_CLEAR_CMD); 
+          LCDMessage(LINE1_START_ADDR,"Feature1 is Run");
+          LCDMessage(LINE2_START_ADDR,"Button3 to exit");
+          UserApp1_StateMachine =UserApp1SM_DisplayWorking;
+          break;
+        case Feature2:
+          LCDCommand(LCD_CLEAR_CMD); 
+          LCDMessage(LINE1_START_ADDR,"Feature2 is Run");
+          LCDMessage(LINE2_START_ADDR,"Button3 to exit");
+          UserApp1_StateMachine =UserApp1SM_DisplayWorking;
+          break;
+        case Feature3:
+          LCDCommand(LCD_CLEAR_CMD); 
+          LCDMessage(LINE1_START_ADDR,"Feature3 is Run");
+          LCDMessage(LINE2_START_ADDR,"Button3 to exit");
+          UserApp1_StateMachine =UserApp1SM_DisplayWorking;
+          break;
+        case Feature4:
+          LCDCommand(LCD_CLEAR_CMD); 
+          LCDMessage(LINE1_START_ADDR,"Feature4 is Run");
+          LCDMessage(LINE2_START_ADDR,"Button3 to exit");
+          UserApp1_StateMachine =UserApp1SM_DisplayWorking;
+          break;
+      }
+      if(WasButtonPressed(BUTTON0))
+      {
+        ButtonAcknowledge(BUTTON0);
+        if(Uioption==STARTUIOPTION)
+        {
+          Uioption=FINALUIOPTION;
+        }
+        else
+        {
+          Uioption--;
+        }
+        MenuOption(Uioption);
+      }
+      
+      
+      if(WasButtonPressed(BUTTON1))
+      {
+        ButtonAcknowledge(BUTTON1);
+        if(Uioption==FINALUIOPTION)
+        {
+          Uioption=STARTUIOPTION;
+        }
+        else
+        {
+          Uioption++;
+        }
+        MenuOption(Uioption);
+      }
+      
+      if(WasButtonPressed(BUTTON2))
+      {
+        ButtonAcknowledge(BUTTON2);
+        switch(Uioption)
+        {
+          case 1:
+           AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF1Message);
+           break;
+          case 2:
+            AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF2Message);
+            break;
+          case 3:
+            AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF3Message);
+            break;
+          case 4:
+            AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF4Message);
+            break;
+        }
+      } 
+    }
+  } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */   
 } /* end UserApp1SM_Idle() */
      
 
@@ -217,25 +307,28 @@ static void UserApp1SM_WaitChannelOpen(void)
   
   if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_OPEN)
   {
-    UserApp1_StateMachine = UserApp1SM_ChannelOpen;
+    if(bprompt==FALSE)
+    {
+      LCDCommand(LCD_CLEAR_CMD); 
+      LCDMessage(LINE1_START_ADDR,"searching");
+      LCDMessage(LINE2_START_ADDR,"welcome!");
+      DebugPrintf("channel1 open successfully");
+      bprompt=TRUE;
+    }
+    if(u16TimeCounter==1000)
+    {
+      u16TimeCounter=0;
+      UserApp1_StateMachine = UserApp1SM_ChannelOpen;  
+    }
+    u16TimeCounter++; 
   }
   
   /* Check for timeout */
   if( IsTimeUp(&UserApp1_u32Timeout, TIMEOUT_VALUE) )
   {
+    DebugPrintf("channel1 open failed");
     AntCloseChannelNumber(ANT_CHANNEL_USERAPP);
-
-#ifdef MPG1
-    LedOff(GREEN);
-    LedOn(YELLOW);
-#endif /* MPG1 */    
-    
-#ifdef MPG2
-    LedOn(RED0);
-    LedOn(GREEN0);
-#endif /* MPG2 */
-    
-    UserApp1_StateMachine = UserApp1SM_Idle;
+    UserApp1_StateMachine =UserApp1SM_Error;
   }
     
 } /* end UserApp1SM_WaitChannelOpen() */
@@ -245,123 +338,30 @@ static void UserApp1SM_WaitChannelOpen(void)
 /* Channel is open, so monitor data */
 static void UserApp1SM_ChannelOpen(void)
 {
-  static u8 u8LastState = 0xff;
-  static u8 au8TickMessage[] = "EVENT x\n\r";  /* "x" at index [6] will be replaced by the current code */
-  static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
-  static u8 au8LastAntData[ANT_APPLICATION_MESSAGE_BYTES] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-  static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
-
-  bool bGotNewData;
+  static u8 au8AnswerMessage[] = {0, 0, 0, 0, 0, 0, 0, 0};
   /* Always check for ANT messages */
   if( AntReadAppMessageBuffer() )
   {
      /* New data message: check what it is */
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
     {
-       
-      /* Check if the new data is the same as the old data and update as we go */
-      for(u8 i = 0; i < ANT_APPLICATION_MESSAGE_BYTES; i++)
+      eDisplayState=JudgeDisplayState();
+      if(eDisplayState == Pared)
       {
-        if(G_au8AntApiCurrentMessageBytes[i] != au8LastAntData[i])
-        {
-          au8TestMessage[i] = G_au8AntApiCurrentMessageBytes[i]; 
-        }
-      }    
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8TestMessage);
-     } /* end if(bGotNewData) */
-  } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
-    
-    else if(G_eAntApiCurrentMessageClass == ANT_TICK)
-    {
-      UserApp1_u32TickMsgCount++;
-
-      /* Look at the TICK contents to check the event code and respond only if it's different */
-      if(u8LastState != G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX])
+        AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8AnswerMessage);
+      }
+      if(eDisplayState == Idle)
       {
-        /* The state changed so update u8LastState and queue a debug message */
-        u8LastState = G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX];
-        au8TickMessage[6] = HexToASCIICharUpper(u8LastState);
-        DebugPrintf(au8TickMessage);
-
-        /* Parse u8LastState to update LED status */
-        switch (u8LastState)
-        {
-#ifdef MPG1
-          /* If we are paired but missing messages, blue blinks */
-          case EVENT_RX_FAIL:
-          {
-            LedOff(GREEN);
-            LedBlink(BLUE, LED_2HZ);
-            break;
-          }
-
-          /* If we drop to search, LED is green */
-          case EVENT_RX_FAIL_GO_TO_SEARCH:
-          {
-            LedOff(BLUE);
-            LedOn(GREEN);
-            break;
-          }
-#endif /* MPG 1 */
-#ifdef MPG2
-          /* If we are paired but missing messages, blue blinks */
-          case EVENT_RX_FAIL:
-          {
-            LedOff(GREEN0);
-            LedBlink(BLUE0, LED_2HZ);
-            break;
-          }
-
-          /* If we drop to search, LED is green */
-          case EVENT_RX_FAIL_GO_TO_SEARCH:
-          {
-            LedOff(BLUE0);
-            LedOn(GREEN0);
-            break;
-          }
-#endif /* MPG 2 */
-          /* If the search times out, the channel should automatically close */
-          case EVENT_RX_SEARCH_TIMEOUT:
-          {
-            DebugPrintf("Search timeout event\r\n");
-            break;
-          }
-
-          case EVENT_CHANNEL_CLOSED:
-          {
-            DebugPrintf("Channel closed event\r\n");
-            break;
-          }
-
-            default:
-          {
-            DebugPrintf("Unexpected Event\r\n");
-            break;
-          }
-        } /* end switch (G_au8AntApiCurrentMessageBytes) */
-      } /* end if (u8LastState != G_au8AntApiCurrentMessageBytes[ANT_TICK_MSG_EVENT_CODE_INDEX]) */
-    } /* end else if(G_eAntApiCurrentMessageClass == ANT_TICK) */
-    
-  } /* end AntReadAppMessageBuffer() */
-  
-  /* A slave channel can close on its own, so explicitly check channel status */
-  if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) != ANT_OPEN)
-  {
-#ifdef MPG1
-    LedBlink(GREEN, LED_2HZ);
-    LedOff(BLUE);
-#endif /* MPG1 */
-
-#ifdef MPG2
-    LedBlink(GREEN0, LED_2HZ);
-    LedOff(BLUE0);
-#endif /* MPG2 */
-    u8LastState = 0xff;
-    
-    UserApp1_u32Timeout = G_u32SystemTime1ms;
-    UserApp1_StateMachine = UserApp1SM_WaitChannelClose;
-  } /* if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) != ANT_OPEN) */
-      
+        u8 u8suffix[]={0};
+        u8suffix[0]=23;
+        LCDCommand(LCD_CLEAR_CMD); 
+        LCDMessage(LINE1_START_ADDR,sLine1menu.UIoption1_Line1);
+        LCDMessage(19,u8suffix);
+        LCDMessage(LINE2_START_ADDR,sLine2menu.UIoption1_Line2);
+        UserApp1_StateMachine =UserApp1SM_DisplayIdle;
+      }
+    } /* end if(bGotNewData) */
+  } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */     
 } /* end UserApp1SM_ChannelOpen() */
 
 
@@ -372,32 +372,14 @@ static void UserApp1SM_WaitChannelClose(void)
   /* Monitor the channel status to check if channel is closed */
   if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_CLOSED)
   {
-#ifdef MPG1
-    LedOff(GREEN);
-    LedOn(YELLOW);
-#endif /* MPG1 */
-
-#ifdef MPG2
-    LedOn(GREEN0);
-    LedOn(RED0);
-#endif /* MPG2 */
-    UserApp1_StateMachine = UserApp1SM_Idle;
+    DebugPrintf("channel close successfully");
+    UserApp1_StateMachine = UserApp1SM_DisplayIdle;
   }
   
   /* Check for timeout */
   if( IsTimeUp(&UserApp1_u32Timeout, TIMEOUT_VALUE) )
   {
-#ifdef MPG1
-    LedOff(GREEN);
-    LedOff(YELLOW);
-    LedBlink(RED, LED_4HZ);
-#endif /* MPG1 */
-
-#ifdef MPG2
-    LedBlink(RED0, LED_4HZ);
-    LedOff(GREEN0);
-#endif /* MPG2 */
-    
+    DebugPrintf("channel close failed");
     UserApp1_StateMachine = UserApp1SM_Error;
   }
     
@@ -408,11 +390,109 @@ static void UserApp1SM_WaitChannelClose(void)
 /* Handle an error */
 static void UserApp1SM_Error(void)          
 {
-
+   LedOn(RED);
 } /* end UserApp1SM_Error() */
+/*-------------------------------------------------------------------------------------------------------------------*/
+/* DisplayWorking */
+static void UserApp1SM_DisplayWorking(void)
+{
+  static u8 au8CommandF4[]={0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  static u8 au8CommandPageUp[]={0x10,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  static u8 au8CommandPageDown[]={0x20,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  if(AntReadAppMessageBuffer())
+  {
+    eDisplayState=JudgeDisplayState();
+    if(eDisplayState==Idle)
+    {
+      MenuOption(Uioption);
+      UserApp1_StateMachine = UserApp1SM_DisplayIdle;
+    }
+    if(WasButtonPressed(BUTTON3))
+    {
+      ButtonAcknowledge(BUTTON3);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF4);   
+    }
+    if(WasButtonPressed(BUTTON0))
+    {
+      ButtonAcknowledge(BUTTON0);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandPageUp);   
+    }
+    if(WasButtonPressed(BUTTON1))
+    {
+      ButtonAcknowledge(BUTTON1);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP,au8CommandPageDown);   
+    }
+  }
 
-
-
+}
+/*-------------------------------------------------------------------------------------------------------------------*/
+/* Judge  Display State */
+static DisplayStateType JudgeDisplayState(void)
+{
+  if(G_au8AntApiCurrentMessageBytes[0]==0x00)
+  {
+    return Pared;
+  }
+  else if(G_au8AntApiCurrentMessageBytes[0]==0xFF)
+  { 
+    return Idle;
+  }
+  else if(G_au8AntApiCurrentMessageBytes[0]==0x01)
+  { 
+    return Feature1;
+  }
+  else if(G_au8AntApiCurrentMessageBytes[0]==0x02)
+  {
+   return Feature2;
+  }
+  else if(G_au8AntApiCurrentMessageBytes[0]==0x03)
+  {
+    return Feature3;
+  }
+  else if(G_au8AntApiCurrentMessageBytes[0]==0x04)
+  {
+    return Feature4;
+  }
+  else 
+  {
+    return Empty;
+  }
+    
+}
+/*-------------------------------------------------------------------------------------------------------------------*/
+/* MenuOption */
+static void MenuOption(u8 UIOption)
+{
+  u8 u8suffix[]={0};
+  u8suffix[0]=23;
+  switch(UIOption)
+  {
+    case 1:
+      LCDCommand(LCD_CLEAR_CMD); 
+      LCDMessage(LINE1_START_ADDR,sLine1menu.UIoption1_Line1);
+      LCDMessage(19,u8suffix);
+      LCDMessage(LINE2_START_ADDR,sLine2menu.UIoption1_Line2);
+      break;
+    case 2:
+      LCDCommand(LCD_CLEAR_CMD); 
+      LCDMessage(LINE1_START_ADDR,sLine1menu.UIoption2_Line1);
+      LCDMessage(19,u8suffix);
+      LCDMessage(LINE2_START_ADDR,sLine2menu.UIoption2_Line2);
+      break;
+    case 3:
+      LCDCommand(LCD_CLEAR_CMD); 
+      LCDMessage(LINE1_START_ADDR,sLine1menu.UIoption3_Line1);
+      LCDMessage(19,u8suffix);
+      LCDMessage(LINE2_START_ADDR,sLine2menu.UIoption3_Line2);
+      break;
+    case 4:
+      LCDCommand(LCD_CLEAR_CMD); 
+      LCDMessage(LINE1_START_ADDR,sLine1menu.UIoption4_Line1);
+      LCDMessage(19,u8suffix);
+      LCDMessage(LINE2_START_ADDR,sLine2menu.UIoption4_Line2);
+      break;
+  }
+}
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* End of File                                                                                                        */
 /*--------------------------------------------------------------------------------------------------------------------*/

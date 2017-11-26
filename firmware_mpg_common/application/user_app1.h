@@ -23,13 +23,13 @@ Header file for yournewtaskname.c
 /**********************************************************************************************************************
 Type Definitions
 **********************************************************************************************************************/
-
+typedef enum{Pared=0,Idle,Feature1,Feature2,Feature3,Feature4,Empty}DisplayStateType;
 
 /**********************************************************************************************************************
 Constants / Definitions
 **********************************************************************************************************************/
 /* Required constants for ANT channel configuration */
-#define ANT_CHANNEL_USERAPP             ANT_CHANNEL_2         /* Channel 0 - 7 */
+#define ANT_CHANNEL_USERAPP             ANT_CHANNEL_0         /* Channel 0 - 7 */
 #define ANT_CHANNEL_TYPE_USERAPP        CHANNEL_TYPE_SLAVE    /* ANT SLAVE */
 #define ANT_DEVICEID_LO_USERAPP         (u8)0x00                 /* Low byte of two-byte Device # */
 #define ANT_DEVICEID_HI_USERAPP         (u8)0x00                /* High byte of two-byte Device # */
@@ -39,7 +39,8 @@ Constants / Definitions
 #define ANT_CHANNEL_PERIOD_HI_USERAPP   (u8)0x20              /* High byte of two-byte channel period */
 #define ANT_FREQUENCY_USERAPP           (u8)57/* 2400MHz + this number 0 - 99 */
 #define ANT_TX_POWER_USERAPP            RADIO_TX_POWER_4DBM   /* RADIO_TX_POWER_0DBM, RADIO_TX_POWER_MINUS5DBM, RADIO_TX_POWER_MINUS10DBM, RADIO_TX_POWER_MINUS20DBM */
-
+#define FINALUIOPTION   4
+#define STARTUIOPTION   1
 #define TIMEOUT_VALUE                   (u32)2000             /* Maximum allowed timeout value for any transition state */
 
 /* G_u32UserAppFlags */
@@ -65,7 +66,8 @@ void UserApp1RunActiveState(void);
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Private functions                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
-
+static DisplayStateType JudgeDisplayState(void);
+static void MenuOption(u8 UIOption);
 
 /***********************************************************************************************************************
 State Machine Declarations
@@ -75,14 +77,31 @@ static void UserApp1SM_Idle(void);
 static void UserApp1SM_WaitChannelOpen(void);
 static void UserApp1SM_ChannelOpen(void);
 static void UserApp1SM_WaitChannelClose(void);
-
+static void UserApp1SM_DisplayWorking(void);
 static void UserApp1SM_Error(void);         
 static void UserApp1SM_FailedInit(void);        
 
-
 #endif /* __USER_APP_H */
-
-
+/***********************************************************************************************************************
+  struct
+***********************************************************************************************************************/
+/*Line1*/
+typedef struct
+{
+  u8* UIoption1_Line1;
+  u8* UIoption2_Line1;
+  u8* UIoption3_Line1;
+  u8* UIoption4_Line1;
+}sLine1Menu;
+/*Line2*/
+typedef struct
+{
+  u8* UIoption1_Line2;
+  u8* UIoption2_Line2;
+  u8* UIoption3_Line2;
+  u8* UIoption4_Line2;
+}sLine2Menu;
+ 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* End of File                                                                                                        */
 /*--------------------------------------------------------------------------------------------------------------------*/

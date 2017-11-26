@@ -162,9 +162,9 @@ void SysTick_Handler(void)
 /*----------------------------------------------------------------------------------------------------------------------
 ISR: PIOA_IrqHandler
 
-Description:
 Parses the PORTA GPIO interrupts and handles them appropriately.  Note that all PORTA GPIO
-interrupts are ORed and will trigger this handler, therefore any expected interrupt that is enabled
+interrupts are ORed and will trigger thi
+Description:s handler, therefore any expected interrupt that is enabled
 must be parsed out and handled.
 
 Requires:
