@@ -133,7 +133,7 @@ void UserApp1Initialize(void)
   sAntSetupData.AntNetwork = ANT_NETWORK_DEFAULT;
   for(u8 i = 0; i < ANT_NETWORK_NUMBER_BYTES; i++)
   {
-    sAntSetupData.AntNetworkKey[i] = ANT_NETWORK_DEFAULT;
+    sAntSetupData.AntNetworkKey[i] = AntNetworkKey[i];
   }
     
   /* If good initialization, set state to channelopen */
