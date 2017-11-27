@@ -63,8 +63,6 @@ extern volatile u32 G_u32SystemTime1s;                 /* From board-specific so
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_" and be declared as static.
 ***********************************************************************************************************************/
-static u32 UserApp1_u32DataMsgCount = 0;             /* Counts the number of ANT_DATA packets received */
-static u32 UserApp1_u32TickMsgCount = 0;             /* Counts the number of ANT_TICK packets received */
 static DisplayStateType eDisplayState=Empty;
 static fnCode_type UserApp1_StateMachine;            /* The state machine function pointer */
 static u32 UserApp1_u32Timeout;                      /* Timeout counter used across states */
@@ -363,27 +361,6 @@ static void UserApp1SM_ChannelOpen(void)
     } /* end if(bGotNewData) */
   } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */     
 } /* end UserApp1SM_ChannelOpen() */
-
-
-/*-------------------------------------------------------------------------------------------------------------------*/
-/* Wait for channel to close */
-static void UserApp1SM_WaitChannelClose(void)
-{
-  /* Monitor the channel status to check if channel is closed */
-  if(AntRadioStatusChannel(ANT_CHANNEL_USERAPP) == ANT_CLOSED)
-  {
-    DebugPrintf("channel close successfully");
-    UserApp1_StateMachine = UserApp1SM_DisplayIdle;
-  }
-  
-  /* Check for timeout */
-  if( IsTimeUp(&UserApp1_u32Timeout, TIMEOUT_VALUE) )
-  {
-    DebugPrintf("channel close failed");
-    UserApp1_StateMachine = UserApp1SM_Error;
-  }
-    
-} /* end UserApp1SM_WaitChannelClose() */
 
 
 /*-------------------------------------------------------------------------------------------------------------------*/
