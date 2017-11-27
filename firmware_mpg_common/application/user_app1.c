@@ -378,26 +378,47 @@ static void UserApp1SM_DisplayWorking(void)
   static u8 au8CommandPageDown[]={0x20,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
   if(AntReadAppMessageBuffer())
   {
+    
+    if(WasButtonPressed(BUTTON3))
+    {
+      ButtonAcknowledge(BUTTON3);
+      PWMAudioSetFrequency(BUZZER1, 500);
+      PWMAudioOn(BUZZER1);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF4);   
+    }
+    else
+    {
+      PWMAudioOff(BUZZER1);
+    } 
+    
+    if(WasButtonPressed(BUTTON0))
+    {
+      PWMAudioSetFrequency(BUZZER1, 500);
+      PWMAudioOn(BUZZER1);
+      ButtonAcknowledge(BUTTON0);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandPageUp);   
+    }
+    else
+    {
+      PWMAudioOff(BUZZER1);
+    }
+    
+    if(WasButtonPressed(BUTTON1))
+    {
+      PWMAudioSetFrequency(BUZZER1, 500);
+      PWMAudioOn(BUZZER1);
+      ButtonAcknowledge(BUTTON1);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP,au8CommandPageDown);   
+    }
+    else
+    {
+      PWMAudioOff(BUZZER1);
+    }
     eDisplayState=JudgeDisplayState();
     if(eDisplayState==Idle)
     {
       MenuOption(Uioption);
       UserApp1_StateMachine = UserApp1SM_DisplayIdle;
-    }
-    if(WasButtonPressed(BUTTON3))
-    {
-      ButtonAcknowledge(BUTTON3);
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF4);   
-    }
-    if(WasButtonPressed(BUTTON0))
-    {
-      ButtonAcknowledge(BUTTON0);
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandPageUp);   
-    }
-    if(WasButtonPressed(BUTTON1))
-    {
-      ButtonAcknowledge(BUTTON1);
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP,au8CommandPageDown);   
     }
   }
 
