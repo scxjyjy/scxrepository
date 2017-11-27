@@ -71,7 +71,14 @@ static sLine1Menu sLine1menu;
 static sLine2Menu sLine2menu;
 static u16 u16TimeCounter=0;
 static bool bprompt=FALSE;
+static bool bExitCommand=FALSE;
+static bool bF3PageUp=FALSE;//display menu
+static bool bF3PageDown=FALSE;
+static bool bPageUp=FALSE;//local menu
+static bool bPageDown=FALSE;
+static bool bButton2Confirmed=FALSE;
 static u8 Uioption=1;//don't change this variable easy
+
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -207,10 +214,6 @@ static void UserApp1SM_WaitChannelAssign(void)
 /* Wait for a message to be queued */
 static void UserApp1SM_DisplayIdle(void)
 {
-   static u8 au8CommandF1Message[]={0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-   static u8 au8CommandF2Message[]={0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-   static u8 au8CommandF3Message[]={0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-   static u8 au8CommandF4Message[]={0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
   if( AntReadAppMessageBuffer() )
   {
      /* New data message: check what it is */
@@ -255,7 +258,11 @@ static void UserApp1SM_DisplayIdle(void)
         {
           Uioption--;
         }
-        MenuOption(Uioption);
+        PWMAudioSetFrequency(BUZZER1, 500);
+        PWMAudioOn(BUZZER1);
+        bPageUp=TRUE;
+        UserApp1_u32Timeout = G_u32SystemTime1ms;
+        UserApp1_StateMachine = UserApp1SM_WaitBuzzerOff;  
       }
       
       
@@ -270,27 +277,21 @@ static void UserApp1SM_DisplayIdle(void)
         {
           Uioption++;
         }
-        MenuOption(Uioption);
+        PWMAudioSetFrequency(BUZZER1, 500);
+        PWMAudioOn(BUZZER1);
+        bPageDown=TRUE;
+        UserApp1_u32Timeout = G_u32SystemTime1ms;
+        UserApp1_StateMachine = UserApp1SM_WaitBuzzerOff;
       }
       
       if(WasButtonPressed(BUTTON2))
       {
         ButtonAcknowledge(BUTTON2);
-        switch(Uioption)
-        {
-          case 1:
-           AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF1Message);
-           break;
-          case 2:
-            AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF2Message);
-            break;
-          case 3:
-            AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF3Message);
-            break;
-          case 4:
-            AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF4Message);
-            break;
-        }
+        PWMAudioSetFrequency(BUZZER1, 500);
+        PWMAudioOn(BUZZER1);
+        bButton2Confirmed=TRUE;
+        UserApp1_u32Timeout = G_u32SystemTime1ms;
+        UserApp1_StateMachine = UserApp1SM_WaitBuzzerOff;
       } 
     }
   } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */   
@@ -373,53 +374,45 @@ static void UserApp1SM_Error(void)
 /* DisplayWorking */
 static void UserApp1SM_DisplayWorking(void)
 {
-  static u8 au8CommandF4[]={0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-  static u8 au8CommandPageUp[]={0x10,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
-  static u8 au8CommandPageDown[]={0x20,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
   if(AntReadAppMessageBuffer())
   {
-    
-    if(WasButtonPressed(BUTTON3))
-    {
-      ButtonAcknowledge(BUTTON3);
-      PWMAudioSetFrequency(BUZZER1, 500);
-      PWMAudioOn(BUZZER1);
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF4);   
-    }
-    else
-    {
-      PWMAudioOff(BUZZER1);
-    } 
-    
-    if(WasButtonPressed(BUTTON0))
-    {
-      PWMAudioSetFrequency(BUZZER1, 500);
-      PWMAudioOn(BUZZER1);
-      ButtonAcknowledge(BUTTON0);
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandPageUp);   
-    }
-    else
-    {
-      PWMAudioOff(BUZZER1);
-    }
-    
-    if(WasButtonPressed(BUTTON1))
-    {
-      PWMAudioSetFrequency(BUZZER1, 500);
-      PWMAudioOn(BUZZER1);
-      ButtonAcknowledge(BUTTON1);
-      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP,au8CommandPageDown);   
-    }
-    else
-    {
-      PWMAudioOff(BUZZER1);
-    }
     eDisplayState=JudgeDisplayState();
     if(eDisplayState==Idle)
     {
       MenuOption(Uioption);
       UserApp1_StateMachine = UserApp1SM_DisplayIdle;
     }
+    
+    if(WasButtonPressed(BUTTON3))
+    {
+      ButtonAcknowledge(BUTTON3);
+      PWMAudioSetFrequency(BUZZER1, 500);
+      PWMAudioOn(BUZZER1);
+      bExitCommand=TRUE;
+      UserApp1_u32Timeout = G_u32SystemTime1ms;
+      UserApp1_StateMachine = UserApp1SM_WaitBuzzerOff;   
+    }
+    
+    if(WasButtonPressed(BUTTON0))
+    {
+      ButtonAcknowledge(BUTTON0);
+      PWMAudioSetFrequency(BUZZER1, 500);
+      PWMAudioOn(BUZZER1);
+      bF3PageDown=TRUE;
+      UserApp1_u32Timeout = G_u32SystemTime1ms;
+      UserApp1_StateMachine = UserApp1SM_WaitBuzzerOff;     
+    }
+    
+    if(WasButtonPressed(BUTTON1))
+    {
+      ButtonAcknowledge(BUTTON1);
+      PWMAudioSetFrequency(BUZZER1, 500);
+      PWMAudioOn(BUZZER1);
+      bF3PageUp=TRUE;
+      UserApp1_u32Timeout = G_u32SystemTime1ms;
+      UserApp1_StateMachine = UserApp1SM_WaitBuzzerOff;     
+    }
+    
   }
 
 }
@@ -489,6 +482,78 @@ static void MenuOption(u8 UIOption)
       LCDMessage(19,u8suffix);
       LCDMessage(LINE2_START_ADDR,sLine2menu.UIoption4_Line2);
       break;
+  }
+}
+/*-------------------------------------------------------------------------------------------------------------------*/
+/* UserApp1SM_WaitBuzzerOff */
+static void UserApp1SM_WaitBuzzerOff(void)
+{
+  static u8 au8CommandExit[]={0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  static u8 au8CommandF3PageUp[]={0x10,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  static u8 au8CommandF3PageDown[]={0x20,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  static u8 au8CommandF1Message[]={0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  static u8 au8CommandF2Message[]={0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  static u8 au8CommandF3Message[]={0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  static u8 au8CommandF4Message[]={0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+  if( IsTimeUp(&UserApp1_u32Timeout, 50) )
+  {
+    if(bExitCommand==TRUE)
+    {
+      bExitCommand=FALSE;
+      PWMAudioOff(BUZZER1);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandExit);
+      UserApp1_StateMachine = UserApp1SM_DisplayWorking;
+    }
+    if(bF3PageUp==TRUE)
+    {
+      bF3PageUp=FALSE;
+      PWMAudioOff(BUZZER1);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF3PageUp);
+      UserApp1_StateMachine = UserApp1SM_DisplayWorking;
+    }
+    if(bF3PageDown==TRUE)
+    {
+      bF3PageDown=FALSE;
+      PWMAudioOff(BUZZER1);
+      AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF3PageDown);
+      UserApp1_StateMachine = UserApp1SM_DisplayWorking;
+    }
+    if(bPageUp==TRUE)
+    {
+      bPageUp=FALSE;
+      PWMAudioOff(BUZZER1);
+      MenuOption(Uioption);
+      UserApp1_StateMachine =UserApp1SM_DisplayIdle;
+    }
+    if(bPageDown==TRUE)
+    {
+      bPageDown=FALSE;
+      PWMAudioOff(BUZZER1);
+      MenuOption(Uioption);
+      UserApp1_StateMachine =UserApp1SM_DisplayIdle;
+    }
+    if(bButton2Confirmed==TRUE)
+    {
+      bButton2Confirmed=FALSE;
+      PWMAudioOff(BUZZER1);
+      switch(Uioption)
+      {
+        case 1:
+         AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF1Message);
+         break;
+        case 2:
+          AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF2Message);
+          break;
+        case 3:
+          AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF3Message);
+          break;
+        case 4:
+          AntQueueBroadcastMessage(ANT_CHANNEL_USERAPP, au8CommandF4Message);
+          break;
+      }
+      UserApp1_StateMachine =UserApp1SM_DisplayIdle;
+    }
+    
   }
 }
 /*--------------------------------------------------------------------------------------------------------------------*/

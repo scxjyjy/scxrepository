@@ -80,7 +80,7 @@ static void UserApp1SM_WaitChannelClose(void);
 static void UserApp1SM_DisplayWorking(void);
 static void UserApp1SM_Error(void);         
 static void UserApp1SM_FailedInit(void);        
-
+static void UserApp1SM_WaitBuzzerOff(void);
 #endif /* __USER_APP_H */
 /***********************************************************************************************************************
   struct
