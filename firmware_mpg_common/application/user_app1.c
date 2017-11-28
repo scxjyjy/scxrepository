@@ -213,7 +213,7 @@ static void UserApp1SM_WaitChannelAssign(void)
   /*-------------------------------------------------------------------------------------------------------------------*/
 /* Wait for a message to be queued */
 static void UserApp1SM_DisplayIdle(void)
-{
+{  
   if( AntReadAppMessageBuffer() )
   {
      /* New data message: check what it is */
@@ -293,6 +293,28 @@ static void UserApp1SM_DisplayIdle(void)
         UserApp1_u32Timeout = G_u32SystemTime1ms;
         UserApp1_StateMachine = UserApp1SM_WaitBuzzerOff;
       } 
+/*if you pressed Button2  careless,this part will clear the record in buffer
+otherwise it possible effect other status */
+      if(WasButtonPressed(BUTTON3))
+      {
+        ButtonAcknowledge(BUTTON3);   
+      }
+    }
+    if(WasButtonPressed(BUTTON3))
+    {
+      ButtonAcknowledge(BUTTON3);   
+    }
+    if(WasButtonPressed(BUTTON2))
+    {
+      ButtonAcknowledge(BUTTON2);   
+    }
+    if(WasButtonPressed(BUTTON1))
+    {
+      ButtonAcknowledge(BUTTON1);   
+    }
+    if(WasButtonPressed(BUTTON0))
+    {
+      ButtonAcknowledge(BUTTON0);   
     }
   } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */   
 } /* end UserApp1SM_Idle() */
@@ -318,6 +340,22 @@ static void UserApp1SM_WaitChannelOpen(void)
     {
       u16TimeCounter=0;
       UserApp1_StateMachine = UserApp1SM_ChannelOpen;  
+    }
+    if(WasButtonPressed(BUTTON3))
+    {
+      ButtonAcknowledge(BUTTON3);   
+    }
+    if(WasButtonPressed(BUTTON2))
+    {
+      ButtonAcknowledge(BUTTON2);   
+    }
+    if(WasButtonPressed(BUTTON1))
+    {
+      ButtonAcknowledge(BUTTON1);   
+    }
+    if(WasButtonPressed(BUTTON0))
+    {
+      ButtonAcknowledge(BUTTON0);   
     }
     u16TimeCounter++; 
   }
@@ -391,6 +429,12 @@ static void UserApp1SM_DisplayWorking(void)
       bExitCommand=TRUE;
       UserApp1_u32Timeout = G_u32SystemTime1ms;
       UserApp1_StateMachine = UserApp1SM_WaitBuzzerOff;   
+    }
+    /*if you pressed Button2  careless,this part will clear the record in buffer
+    otherwise it possible effect other status */
+    if(WasButtonPressed(BUTTON2))
+    {
+      ButtonAcknowledge(BUTTON2);   
     }
     
     if(WasButtonPressed(BUTTON0))
