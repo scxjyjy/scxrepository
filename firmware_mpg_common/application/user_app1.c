@@ -224,25 +224,25 @@ static void UserApp1SM_DisplayIdle(void)
       {
         case Feature1:
           LCDCommand(LCD_CLEAR_CMD); 
-          LCDMessage(LINE1_START_ADDR,"Feature1 is Run");
+          LCDMessage(LINE1_START_ADDR,"Feature1 is Running");
           LCDMessage(LINE2_START_ADDR,"Button3 to exit");
           UserApp1_StateMachine =UserApp1SM_DisplayWorking;
           break;
         case Feature2:
           LCDCommand(LCD_CLEAR_CMD); 
-          LCDMessage(LINE1_START_ADDR,"Feature2 is Run");
+          LCDMessage(LINE1_START_ADDR,"Feature2 is Running");
           LCDMessage(LINE2_START_ADDR,"Button3 to exit");
           UserApp1_StateMachine =UserApp1SM_DisplayWorking;
           break;
         case Feature3:
           LCDCommand(LCD_CLEAR_CMD); 
-          LCDMessage(LINE1_START_ADDR,"Feature3 is Run");
+          LCDMessage(LINE1_START_ADDR,"Feature3 is Running");
           LCDMessage(LINE2_START_ADDR,"Button3 to exit");
           UserApp1_StateMachine =UserApp1SM_DisplayWorking;
           break;
         case Feature4:
           LCDCommand(LCD_CLEAR_CMD); 
-          LCDMessage(LINE1_START_ADDR,"Feature4 is Run");
+          LCDMessage(LINE1_START_ADDR,"Feature4 is Running");
           LCDMessage(LINE2_START_ADDR,"Button3 to exit");
           UserApp1_StateMachine =UserApp1SM_DisplayWorking;
           break;
